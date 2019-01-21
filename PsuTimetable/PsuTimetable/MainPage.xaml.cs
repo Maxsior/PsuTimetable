@@ -16,24 +16,19 @@ namespace PsuTimetable
 		{
 			//InitializeComponent();
 
-			// TODO: Check internet connection
-
-			messageLabel = new Label
-			{
-				HorizontalOptions = LayoutOptions.Center
-			};
-
-			var toolbarItem = new ToolbarItem
-			{
+			Title = "Расписание";
+			
+			var toolbarItem = new ToolbarItem {
 				Text = "Выход"
 			};
 			toolbarItem.Clicked += OnLogoutButtonClicked;
 			ToolbarItems.Add(toolbarItem);
 
-			Title = "Расписание";
-
-			Content = new StackLayout
-			{
+			messageLabel = new Label {
+				HorizontalOptions = LayoutOptions.Center
+			};
+			
+			Content = new StackLayout {
 				Children = {
 					new ScrollView {
 						VerticalOptions = LayoutOptions.FillAndExpand,
@@ -43,23 +38,10 @@ namespace PsuTimetable
 			};
 
 			timetable = new Timetable();
-
+			
 			UpdateTimetableUI();
 		}
-
-		private async void UpdateTimetableUI()
-		{
-			await timetable.Update();
-
-			messageLabel.Text = timetable.currentWeek.name + '\n';
-			messageLabel.Text += timetable.currentWeek.days[0].name + '\n';
-			messageLabel.Text += timetable.currentWeek.days[0].pairs[0].number + '\n';
-			messageLabel.Text += timetable.currentWeek.days[0].pairs[0].name + '\n';
-			messageLabel.Text += timetable.currentWeek.days[0].pairs[0].startTime + '\n';
-			messageLabel.Text += timetable.currentWeek.days[0].pairs[0].teacherName + '\n';
-			messageLabel.Text += timetable.currentWeek.days[0].pairs[0].classroom + '\n';
-		}
-
+		
 		private async void OnLogoutButtonClicked(object sender, EventArgs e)
 		{
 			await Logout();
@@ -70,6 +52,49 @@ namespace PsuTimetable
 			App.IsLoggedIn = false;
 			Navigation.InsertPageBefore(new LoginPage(), this);
 			await Navigation.PopAsync();
+		}
+
+		private async void UpdateTimetableUI()
+		{
+			// TODO: Store Timetable and update it if there is internet connection
+			await timetable.Update();
+
+			// Update UI
+			messageLabel.Text = timetable.currentWeek.name + "\n\n";
+
+			foreach (Day day in timetable.currentWeek.days)
+			{
+				messageLabel.Text += "==========================================\n";
+				messageLabel.Text += day.name + '\n';
+				messageLabel.Text += "==========================================\n\n";
+
+				if (day.bPairs)
+				{
+					foreach (Pair pair in day.pairs)
+					{
+						messageLabel.Text += "------------------------------------------\n";
+						messageLabel.Text += pair.number + '\n';
+						messageLabel.Text += pair.startTime + '\n';
+						messageLabel.Text += "------------------------------------------\n";
+
+						if (pair.bExist)
+						{
+							messageLabel.Text += pair.name + '\n';
+							messageLabel.Text += pair.classroom + '\n';
+							messageLabel.Text += pair.teacherName + "\n\n";
+						}
+						else
+						{
+							messageLabel.Text += "Пары нет\n\n";
+						}
+					}
+				}
+				else
+				{
+					messageLabel.Text += "Пар нет\n\n";
+				}
+			}
+
 		}
 	}
 }
