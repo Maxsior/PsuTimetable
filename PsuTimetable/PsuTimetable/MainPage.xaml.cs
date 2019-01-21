@@ -42,12 +42,12 @@ namespace PsuTimetable
 			UpdateTimetableUI();
 		}
 		
-		private async void OnLogoutButtonClicked(object sender, EventArgs e)
+		private void OnLogoutButtonClicked(object sender, EventArgs e)
 		{
-			await Logout();
+			Logout();
 		}
 
-		private async Task Logout()
+		private async void Logout()
 		{
 			App.IsLoggedIn = false;
 			Navigation.InsertPageBefore(new LoginPage(), this);

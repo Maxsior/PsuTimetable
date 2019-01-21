@@ -28,7 +28,7 @@ namespace PsuTimetable
 
 			messageLabel = new Label
 			{
-				HorizontalOptions = LayoutOptions.Center
+				HorizontalTextAlignment = TextAlignment.Center
 			};
 
 			usernameEntry = new Entry
@@ -43,7 +43,7 @@ namespace PsuTimetable
 				Text = string.Empty,
 				Placeholder = "Пароль",
 				IsPassword = true,
-				ReturnType = ReturnType.Send
+				ReturnType = ReturnType.Go
 			};
 
 			Button button = new Button
@@ -58,16 +58,16 @@ namespace PsuTimetable
 				passwordEntry.Focus();
 			};
 
-			//passwordEntry.Completed += (object sender, EventArgs args) => {
-			//	button.OnButtonClicked(null);
-			//};
+			passwordEntry.Completed += (object sender, EventArgs args) => {
+				Login(usernameEntry.Text, passwordEntry.Text);
+			};
 
 			Label loginInfoLabel = new Label
 			{
 				Text = "Вход в ЕТИС",
 				FontSize = 20,
 				TextColor = Color.Black,
-				HorizontalOptions = LayoutOptions.Center
+				HorizontalTextAlignment = TextAlignment.Center
 			};
 
 			Content = new StackLayout
@@ -82,9 +82,14 @@ namespace PsuTimetable
 			};
 		}
 
-		async void OnButtonClicked(object sender, EventArgs args)
+		private void OnButtonClicked(object sender, EventArgs args)
 		{
-			if (usernameEntry.Text == string.Empty || passwordEntry.Text == string.Empty)
+			Login(usernameEntry.Text, passwordEntry.Text);
+		}
+
+		private async void Login(string username, string password)
+		{
+			if (username == string.Empty || password == string.Empty)
 			{
 				messageLabel.Text = "Введите имя пользователя и пароль";
 				return;
@@ -92,34 +97,31 @@ namespace PsuTimetable
 
 			if (!CrossConnectivity.Current.IsConnected)
 			{
-				//await DisplayAlert("Внимание", "Не удалось подключиться к сети", "OK");
 				messageLabel.Text = "Не удалось подключиться к сети";
 				return;
 			}
 
-			bool bLoggedIn = await Login(usernameEntry.Text, passwordEntry.Text);
-			if (bLoggedIn)
-			{
-				App.IsLoggedIn = true;
-				Navigation.InsertPageBefore(new MainPage(), this);
-				await Navigation.PopAsync();
-			}
-			else
-			{
-				messageLabel.Text = "Неверное имя пользователя или пароль";
-				passwordEntry.Text = string.Empty;
-			}
-		}
-
-		private async Task<bool> Login(string username, string password)
-		{
 			string jsonData = "p_redirect=&p_username=" + HttpUtility.UrlEncode(username, Encoding.GetEncoding(1251)) + "&p_password=" + password;
 			var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
 
 			HttpResponseMessage response = await App.MainClient.PostAsync("stu.login", content);
 			string html = await response.Content.ReadAsStringAsync();
 
-			return !html.Contains("Неверное имя пользователя или пароль");
+			if (html.Contains("Неверное имя пользователя или пароль"))
+			{
+				messageLabel.Text = "Неверное имя пользователя или пароль";
+				passwordEntry.Text = string.Empty;
+				return;
+			}
+			else if (html.Contains("Превышен лимит"))
+			{
+				messageLabel.Text = "Превышен лимит (5) неудачных попыток ввода пароля. Повторите попытку через 10 минут";
+				return;
+			}
+
+			App.IsLoggedIn = true;
+			Navigation.InsertPageBefore(new MainPage(), this);
+			await Navigation.PopAsync();
 		}
 	}
 }
