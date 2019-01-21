@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Net.Http;
 using HtmlAgilityPack;
+using System.Threading.Tasks;
 
 namespace PsuTimetable
 {
@@ -36,15 +37,10 @@ namespace PsuTimetable
 
 		public Timetable()
 		{
-			currentWeek = new Week
-			{
-				days = new Day[6]
-			};
 
-			Update();
 		}
 		
-		public async void Update()
+		public async Task Update()
 		{
 			HttpResponseMessage response = await App.MainClient.GetAsync("stu.timetable");
 			string html = await response.Content.ReadAsStringAsync();
@@ -53,6 +49,7 @@ namespace PsuTimetable
 			htmlDoc.LoadHtml(html);
 
 			// TODO: Store all weeks
+			currentWeek.days = new Day[6];
 			currentWeek.name = htmlDoc.DocumentNode.SelectSingleNode("//html/body/div[2]/div/div[2]/div[2]/div[2]/span").InnerText;
 
 			HtmlNode timetableNode = htmlDoc.DocumentNode.SelectSingleNode("//html/body/div[2]/div/div[2]/div[3]");

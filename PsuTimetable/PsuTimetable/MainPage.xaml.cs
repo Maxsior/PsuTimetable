@@ -10,12 +10,13 @@ namespace PsuTimetable
 	public partial class MainPage : ContentPage
 	{
 		Label messageLabel;
+		Timetable timetable;
 
 		public MainPage()
 		{
 			//InitializeComponent();
 
-			// TO-DO: Check internet connection
+			// TODO: Check internet connection
 
 			messageLabel = new Label
 			{
@@ -40,14 +41,31 @@ namespace PsuTimetable
 					}
 				}
 			};
+
+			timetable = new Timetable();
+
+			UpdateTimetableUI();
 		}
 
-		async void OnLogoutButtonClicked(object sender, EventArgs e)
+		private async void UpdateTimetableUI()
+		{
+			await timetable.Update();
+
+			messageLabel.Text = timetable.currentWeek.name + '\n';
+			messageLabel.Text += timetable.currentWeek.days[0].name + '\n';
+			messageLabel.Text += timetable.currentWeek.days[0].pairs[0].number + '\n';
+			messageLabel.Text += timetable.currentWeek.days[0].pairs[0].name + '\n';
+			messageLabel.Text += timetable.currentWeek.days[0].pairs[0].startTime + '\n';
+			messageLabel.Text += timetable.currentWeek.days[0].pairs[0].teacherName + '\n';
+			messageLabel.Text += timetable.currentWeek.days[0].pairs[0].classroom + '\n';
+		}
+
+		private async void OnLogoutButtonClicked(object sender, EventArgs e)
 		{
 			await Logout();
 		}
 
-		async Task Logout()
+		private async Task Logout()
 		{
 			App.IsLoggedIn = false;
 			Navigation.InsertPageBefore(new LoginPage(), this);
