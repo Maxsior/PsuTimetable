@@ -8,7 +8,6 @@ using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using System.Net.Http;
 using System.Web;
-using Plugin.Connectivity;
 
 namespace PsuTimetable
 {
@@ -87,6 +86,20 @@ namespace PsuTimetable
 			Login(usernameEntry.Text, passwordEntry.Text);
 		}
 
+		public static bool IsConnectionAvailable()
+		{
+			try
+			{
+				System.Net.Sockets.TcpClient client = new System.Net.Sockets.TcpClient("www.google.com", 80);
+				client.Close();
+				return true;
+			}
+			catch (System.Exception)
+			{
+				return false;
+			}
+		}
+		
 		private async void Login(string username, string password)
 		{
 			if (username == string.Empty || password == string.Empty)
@@ -95,7 +108,7 @@ namespace PsuTimetable
 				return;
 			}
 
-			if (!CrossConnectivity.Current.IsConnected)
+			if (!IsConnectionAvailable())
 			{
 				messageLabel.Text = "Не удалось подключиться к сети";
 				return;
@@ -105,6 +118,13 @@ namespace PsuTimetable
 			var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
 
 			HttpResponseMessage response = await App.MainClient.PostAsync("stu.login", content);
+
+			if (!response.IsSuccessStatusCode)
+			{
+				messageLabel.Text = "Не удалось получить доступ к сайту (" + response.StatusCode.ToString() + ")";
+				return;
+			}
+
 			string html = await response.Content.ReadAsStringAsync();
 
 			if (html.Contains("Неверное имя пользователя или пароль"))
