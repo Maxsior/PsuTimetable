@@ -2,13 +2,15 @@
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using System.Net.Http;
+using System.Web;
+using System.Text;
+using System.Threading.Tasks;
 
 [assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 namespace PsuTimetable
 {
 	public partial class App : Application
 	{
-		public static bool IsLoggedIn { get; set; }
 		public static HttpClient MainClient { get; set; }
 
 		public App()
@@ -20,14 +22,7 @@ namespace PsuTimetable
 				BaseAddress = new Uri("https://student.psu.ru/pls/stu_cus_et/")
 			};
 
-			if (IsLoggedIn)
-			{
-				MainPage = new NavigationPage(new MainPage());
-			}
-			else
-			{
-				MainPage = new NavigationPage(new LoginPage());
-			}
+			MainPage = new NavigationPage(new LoginPage());
 		}
 
 		protected override void OnStart()
