@@ -17,73 +17,78 @@ namespace PsuTimetable
 		Label messageLabel;
 		Entry usernameEntry;
 		Entry passwordEntry;
+		Switch saveCredentialsSwitch;
 
 		public LoginPage()
 		{
 			//InitializeComponent();
 
-			Title = "Расписание ЕТИС";
+			Title = "Вход в ЕТИС";
 			Padding = new Thickness(5, 20, 5, 0);
 
-			messageLabel = new Label
-			{
+			messageLabel = new Label {
 				HorizontalTextAlignment = TextAlignment.Center
 			};
 
-			usernameEntry = new Entry
-			{
-				Text = string.Empty,
+			usernameEntry = new Entry {
 				Placeholder = "Имя пользователя",
 				ReturnType = ReturnType.Next
 			};
 
-			passwordEntry = new Entry
-			{
-				Text = string.Empty,
+			passwordEntry = new Entry {
 				Placeholder = "Пароль",
 				IsPassword = true,
-				ReturnType = ReturnType.Go
+				ReturnType = ReturnType.Done
 			};
 
-			Button button = new Button
-			{
+			Button loginButton = new Button {
 				Text = "Войти",
-				HorizontalOptions = LayoutOptions.Center
+				HorizontalOptions = LayoutOptions.FillAndExpand,
+				TranslationY = 20
 			};
-			button.Clicked += OnButtonClicked;
+			loginButton.Clicked += OnButtonClicked;
 
+			saveCredentialsSwitch = new Switch {
+				IsToggled = true
+			};
 
 			usernameEntry.Completed += (object sender, EventArgs args) => {
 				passwordEntry.Focus();
 			};
 
 			passwordEntry.Completed += (object sender, EventArgs args) => {
-				Login(usernameEntry.Text, passwordEntry.Text);
+				Login(usernameEntry.Text, passwordEntry.Text, saveCredentialsSwitch.IsToggled);
 			};
 
-			Label loginInfoLabel = new Label
-			{
-				Text = "Вход в ЕТИС",
-				FontSize = 20,
-				TextColor = Color.Black,
-				HorizontalTextAlignment = TextAlignment.Center
-			};
-
-			Content = new StackLayout
-			{
+			Content = new StackLayout {
 				Children = {
 					messageLabel,
-					loginInfoLabel,
 					usernameEntry,
 					passwordEntry,
-					button
+					new StackLayout {
+						Orientation = StackOrientation.Horizontal,
+						HorizontalOptions = LayoutOptions.End,
+						Children = {
+							new Label {
+								Text = "Запомнить меня",
+								VerticalTextAlignment = TextAlignment.Center
+							},
+							saveCredentialsSwitch
+						}
+					},
+					loginButton
 				}
 			};
+
+			if (Credentials.IsSaved())
+			{
+				Login(Credentials.Username, Credentials.Password, true);
+			}
 		}
 
 		private void OnButtonClicked(object sender, EventArgs args)
 		{
-			Login(usernameEntry.Text, passwordEntry.Text);
+			Login(usernameEntry.Text, passwordEntry.Text, saveCredentialsSwitch.IsToggled);
 		}
 
 		public static bool IsConnectionAvailable()
@@ -100,9 +105,9 @@ namespace PsuTimetable
 			}
 		}
 		
-		private async void Login(string username, string password)
+		private async void Login(string username, string password, bool bSaveCredentials)
 		{
-			if (username == string.Empty || password == string.Empty)
+			if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
 			{
 				messageLabel.Text = "Введите имя пользователя и пароль";
 				return;
@@ -131,6 +136,7 @@ namespace PsuTimetable
 			{
 				messageLabel.Text = "Неверное имя пользователя или пароль";
 				passwordEntry.Text = string.Empty;
+				passwordEntry.Focus();
 				return;
 			}
 			else if (html.Contains("Превышен лимит"))
@@ -139,7 +145,11 @@ namespace PsuTimetable
 				return;
 			}
 
-			App.IsLoggedIn = true;
+			if (bSaveCredentials && !Credentials.IsSaved())
+			{
+				await Credentials.Save(username, password);
+			}
+
 			Navigation.InsertPageBefore(new MainPage(), this);
 			await Navigation.PopAsync();
 		}

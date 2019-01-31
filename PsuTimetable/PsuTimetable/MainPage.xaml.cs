@@ -38,7 +38,7 @@ namespace PsuTimetable
 			};
 
 			timetable = new Timetable();
-			
+
 			UpdateTimetableUI();
 		}
 		
@@ -49,7 +49,8 @@ namespace PsuTimetable
 
 		private async void Logout()
 		{
-			App.IsLoggedIn = false;
+			await Credentials.Clear();
+
 			Navigation.InsertPageBefore(new LoginPage(), this);
 			await Navigation.PopAsync();
 		}
