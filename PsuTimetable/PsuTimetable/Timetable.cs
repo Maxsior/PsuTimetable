@@ -50,7 +50,12 @@ namespace PsuTimetable
 
 			// TODO: Store all weeks
 			currentWeek.days = new Day[6];
-			currentWeek.name = htmlDoc.DocumentNode.SelectSingleNode("//html/body/div[2]/div/div[2]/div[2]/div[2]/span").InnerText.TrimEnd('\n');
+
+			HtmlNode weekNameNode = htmlDoc.DocumentNode.SelectSingleNode("//html/body/div[2]/div/div[2]/div[2]/span");
+			if (weekNameNode != null)
+			{
+				currentWeek.name = weekNameNode.InnerText.TrimEnd('\n');
+			}
 
 			HtmlNode timetableNode = htmlDoc.DocumentNode.SelectSingleNode("//html/body/div[2]/div/div[2]/div[3]");
 			if (timetableNode != null)

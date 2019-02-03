@@ -58,6 +58,7 @@ namespace PsuTimetable
 		private async void UpdateTimetableUI()
 		{
 			// TODO: Store Timetable and update it if there is internet connection
+			// https://github.com/xamarin/xamarin-forms-samples/tree/master/Todo/Todo
 			await timetable.Update();
 
 			// Update UI
@@ -74,8 +75,7 @@ namespace PsuTimetable
 					foreach (Pair pair in day.pairs)
 					{
 						messageLabel.Text += "------------------------------------------\n";
-						messageLabel.Text += pair.number + '\n';
-						messageLabel.Text += pair.startTime + '\n';
+						messageLabel.Text += pair.number + " " + pair.startTime + '\n';
 						messageLabel.Text += "------------------------------------------\n";
 
 						if (pair.bExist)
