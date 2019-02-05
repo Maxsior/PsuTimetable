@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<TabbedPage xmlns="http://xamarin.com/schemas/2014/forms"
+            xmlns:android="clr-namespace:Xamarin.Forms.PlatformConfiguration.AndroidSpecific;assembly=Xamarin.Forms.Core"
+            xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+            x:Class="PsuTimetable.MainTabbedPage"
+            android:TabbedPage.ToolbarPlacement="Bottom"
+            android:TabbedPage.IsSwipePagingEnabled="False"
+            BackgroundColor="Accent">
+
+    <ContentPage Title="Будильник" BackgroundColor="White"/>
+    <TabbedPage xmlns:android="clr-namespace:Xamarin.Forms.PlatformConfiguration.AndroidSpecific;assembly=Xamarin.Forms.Core"
+                Title="Расписание"
+                BackgroundColor="White"
+                BarBackgroundColor="White"
+                android:TabbedPage.BarItemColor="Gray"
+                android:TabbedPage.BarSelectedItemColor="Black">
+        
+        <ContentPage Title="1 февраля"/>
+        <ContentPage Title="2 февраля"/>
+        <ContentPage Title="3 февраля"/>
+        <ContentPage Title="4 февраля"/>
+        <ContentPage Title="5 февраля"/>
+        <ContentPage Title="6 февраля"/>
+        <ContentPage Title="7 февраля"/>
+        <ContentPage Title="8 февраля"/>
+        <ContentPage Title="9 февраля"/>
+    </TabbedPage>
+    <ContentPage Title="Настройки" BackgroundColor="White"/>
+    
+</TabbedPage>
