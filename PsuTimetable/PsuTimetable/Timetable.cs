@@ -4,42 +4,92 @@ using System.Text;
 using System.Net.Http;
 using HtmlAgilityPack;
 using System.Threading.Tasks;
+using SQLite;
+using System.IO;
+using SQLiteNetExtensions.Attributes;
+using SQLiteNetExtensionsAsync.Extensions;
 
 namespace PsuTimetable
 {
-	public struct Pair
+	[Table("Pairs")]
+	public class Pair
 	{
-		public bool bExist;
-		public string name;
-		public string number;
-		public string startTime;
-		public string teacherName;
-		public string classroom;
+		[PrimaryKey, AutoIncrement]
+		public int Id { get; set; }
+
+		public bool IsExist { get; set; }
+		public string Name { get; set; }
+		public string Number { get; set; }
+		public string StartTime { get; set; }
+		public string TeacherName { get; set; }
+		public string Classroom { get; set; }
+
+		[ForeignKey(typeof(Day))]
+		public int DayId { get; set; }
 	}
 
-	public struct Day
+	[Table("Days")]
+	public class Day
 	{
-		public bool bPairs;
-		public string name;
-		public Pair[] pairs;
+		[PrimaryKey, AutoIncrement]
+		public int Id { get; set; }
+
+		public bool ContainPairs { get; set; }
+		public string Name { get; set; }
+		
+		[OneToMany(CascadeOperations = CascadeOperation.All)]
+		public List<Pair> Pairs { get; set; }
+
+		public Day() => Pairs = new List<Pair>();
+
+		[ForeignKey(typeof(Week))]
+		public int WeekId { get; set; }
 	}
 
-	public struct Week
+	[Table("Weeks")]
+	public class Week
 	{
-		public string name;
-		public uint number;
-		public Day[] days;
+		[PrimaryKey, AutoIncrement]
+		public int Id { get; set; }
+
+		public int Number { get; set; }
+		public string Name { get; set; }
+
+		[OneToMany(CascadeOperations = CascadeOperation.All)]
+		public List<Day> Days { get; set; }
+
+		public Week() => Days = new List<Day>();
 	}
 
 	public class Timetable
     {
-		public Week currentWeek;
+		readonly SQLiteAsyncConnection database;
+
+		// Store currentWeekId in database
+		private int currentWeekId;
+		public List<Week> Weeks { get; set; }
+		public Week CurrentWeek => Weeks[currentWeekId];
 
 		public Timetable()
 		{
-
+			string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Timetable.db");
+			database = new SQLiteAsyncConnection(path);
+			database.CreateTableAsync<Week>().Wait();
+			database.CreateTableAsync<Day>().Wait();
+			database.CreateTableAsync<Pair>().Wait();
+			Weeks = new List<Week>();
 		}
-		
+
+		public async Task Save()
+		{
+			await database.InsertAllWithChildrenAsync(Weeks, recursive: true);
+		}
+
+		public async Task Load()
+		{
+			Weeks = await database.GetAllWithChildrenAsync<Week>(recursive: true);
+		}
+
 		public async Task Update()
 		{
 			HttpResponseMessage response = await App.MainClient.GetAsync("stu.timetable");
@@ -48,54 +98,93 @@ namespace PsuTimetable
 			var htmlDoc = new HtmlDocument();
 			htmlDoc.LoadHtml(html);
 
-			// TODO: Store all weeks
-			currentWeek.days = new Day[6];
+			int startWeekNumber = -1;
+			HtmlNode weeksNode = htmlDoc.DocumentNode.SelectSingleNode("//html/body/div[2]/div/div[2]/div[2]/ul");
+			foreach (HtmlNode weekNode in weeksNode.SelectNodes("./li"))
+			{
+				Week week;
 
-			HtmlNode weekNameNode = htmlDoc.DocumentNode.SelectSingleNode("//html/body/div[2]/div/div[2]/div[2]/span");
+				HtmlNode refNode = weekNode.SelectSingleNode("./a");
+				if (refNode != null)
+				{
+					int weekNumber = int.Parse(refNode.InnerText);
+					if (startWeekNumber == -1)
+						startWeekNumber = weekNumber;
+
+					week = await InitWeek(weekNumber);
+				}
+				else
+				{
+					int weekNumber = int.Parse(weekNode.InnerText);
+					if (startWeekNumber == -1)
+						startWeekNumber = weekNumber;
+
+					week = await InitWeek(weekNumber);
+					currentWeekId = weekNumber - startWeekNumber;
+				}
+
+				Weeks.Add(week);
+			}
+		}
+
+		public async Task<Week> InitWeek(int weekNumber)
+		{
+			HttpResponseMessage response = await App.MainClient.GetAsync("stu.timetable?p_cons=n&p_week=" + weekNumber.ToString());
+			string html = await response.Content.ReadAsStringAsync();
+
+			var htmlDoc = new HtmlDocument();
+			htmlDoc.LoadHtml(html);
+
+			Week week = new Week
+			{
+				Number = weekNumber
+			};
+
+			HtmlNode weekNameNode = htmlDoc.DocumentNode.SelectSingleNode("//html/body/div[2]/div/div[2]/div[2]/div[2]/span");
+			HtmlNode timetableNode = htmlDoc.DocumentNode.SelectSingleNode("//html/body/div[2]/div/div[2]/div[3]");
+
 			if (weekNameNode != null)
 			{
-				currentWeek.name = weekNameNode.InnerText.TrimEnd('\n');
+				week.Name = weekNameNode.InnerText.TrimEnd('\n');
 			}
-
-			HtmlNode timetableNode = htmlDoc.DocumentNode.SelectSingleNode("//html/body/div[2]/div/div[2]/div[3]");
+			
 			if (timetableNode != null)
 			{
-				int dayNumber = 0;
-				HtmlNodeCollection daysNodes = timetableNode.SelectNodes("./div");
-
-				foreach (HtmlNode dayNode in daysNodes)
+				foreach (HtmlNode dayNode in timetableNode.SelectNodes("./div"))
 				{
+					Day day = new Day();
+
 					HtmlNode tableNode = dayNode.SelectSingleNode("./table");
-					currentWeek.days[dayNumber].bPairs = (tableNode != null);
-					currentWeek.days[dayNumber].name = dayNode.SelectSingleNode("./h3").InnerText;
+					day.ContainPairs = (tableNode != null);
+					day.Name = dayNode.SelectSingleNode("./h3").InnerText;
 
 					if (tableNode != null)
 					{
-						int pairNumber = 0;
-						HtmlNodeCollection pairsNodes = tableNode.SelectNodes("./tr");
-						currentWeek.days[dayNumber].pairs = new Pair[pairsNodes.Count];
-
-						foreach (HtmlNode pairNode in pairsNodes)
+						foreach (HtmlNode pairNode in tableNode.SelectNodes("./tr"))
 						{
+							Pair pair = new Pair();
+
 							HtmlNode pairInfoNode = pairNode.SelectSingleNode("./td[2]/div");
-							currentWeek.days[dayNumber].pairs[pairNumber].bExist = (pairInfoNode != null);
-							currentWeek.days[dayNumber].pairs[pairNumber].startTime = pairNode.SelectSingleNode("./td[1]/font").InnerText;
-							currentWeek.days[dayNumber].pairs[pairNumber].number = (pairNumber + 1).ToString() + " пара";
+							pair.IsExist = (pairInfoNode != null);
+							pair.StartTime = pairNode.SelectSingleNode("./td[1]/font").InnerText;
+							pair.Number = pairNode.SelectSingleNode("./td[1]").InnerText.Substring(0, 6);
 
 							if (pairInfoNode != null)
 							{
-								currentWeek.days[dayNumber].pairs[pairNumber].name = pairInfoNode.SelectSingleNode("./div[1]/span[2]").InnerText.Trim('\n');
-								currentWeek.days[dayNumber].pairs[pairNumber].teacherName = pairInfoNode.SelectSingleNode("./div[1]/span[1]/a[1]").InnerText;
-								currentWeek.days[dayNumber].pairs[pairNumber].classroom = pairInfoNode.SelectSingleNode("./div[2]/span").InnerText;
+								pair.Name = pairInfoNode.SelectSingleNode("./div[1]/span[2]").InnerText.Trim('\n');
+								pair.TeacherName = pairInfoNode.SelectSingleNode("./div[1]/span[1]/a[1]").InnerText;
+								pair.Classroom = pairInfoNode.SelectSingleNode("./div[2]/span").InnerText;
 							}
 
-							pairNumber++;
+							day.Pairs.Add(pair);
 						}
 					}
 
-					dayNumber++;
+					week.Days.Add(day);
 				}
 			}
+
+			return week;
 		}
 	}
 }

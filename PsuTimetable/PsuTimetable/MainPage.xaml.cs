@@ -1,21 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Xamarin.Forms;
+using Xamarin.Forms.PlatformConfiguration.AndroidSpecific;
 
 namespace PsuTimetable
 {
 	public partial class MainPage : ContentPage
 	{
+		Label infoLabel;
+		Frame infoFrame;
 		Label messageLabel;
 		Timetable timetable;
+
+		Color warningColor = Color.FromHex("#ffa000"); // #ffa000 #ffab00
+		Color errorColor = Color.FromHex("#d1321c");
 
 		public MainPage()
 		{
 			//InitializeComponent();
-
+			
 			Title = "Расписание";
 			
 			var toolbarItem = new ToolbarItem {
@@ -24,22 +31,41 @@ namespace PsuTimetable
 			toolbarItem.Clicked += OnLogoutButtonClicked;
 			ToolbarItems.Add(toolbarItem);
 
+			infoLabel = new Label {
+				HorizontalOptions = LayoutOptions.CenterAndExpand,
+				VerticalOptions = LayoutOptions.CenterAndExpand,
+				TextColor = Color.White
+			};
+
+			infoFrame = new Frame
+			{
+				BackgroundColor = warningColor,
+				HorizontalOptions = LayoutOptions.FillAndExpand,
+				HeightRequest = 30,
+				CornerRadius = 0,
+				Padding = 0,
+				Content = infoLabel
+			};
+
 			messageLabel = new Label {
 				HorizontalOptions = LayoutOptions.Center
 			};
 			
 			Content = new StackLayout {
 				Children = {
+					infoFrame,
 					new ScrollView {
 						VerticalOptions = LayoutOptions.FillAndExpand,
 						Content = messageLabel
 					}
 				}
 			};
+		}
 
-			timetable = new Timetable();
-
-			UpdateTimetableUI();
+		private void ShowMessage(string text, Color color)
+		{
+			infoLabel.Text = text;
+			infoFrame.BackgroundColor = color;
 		}
 		
 		private void OnLogoutButtonClicked(object sender, EventArgs e)
@@ -55,34 +81,67 @@ namespace PsuTimetable
 			await Navigation.PopAsync();
 		}
 
-		private async void UpdateTimetableUI()
+		protected override async void OnAppearing()
 		{
-			// TODO: Store Timetable and update it if there is internet connection
-			// https://github.com/xamarin/xamarin-forms-samples/tree/master/Todo/Todo
-			await timetable.Update();
+			timetable = new Timetable();
+			
+			if (App.IsConnectionAvailable())
+			{
+				if (Credentials.IsSaved())
+				{
+					int errorCode = await App.SendLoginRequest(Credentials.Username, Credentials.Password);
 
-			// Update UI
-			messageLabel.Text = timetable.currentWeek.name + "\n\n";
+					if (errorCode == 0)
+					{
+						await timetable.Update();
+						UpdateTimetableUI();
+						await timetable.Save();
+					}
+					else
+					{
+						ShowMessage("Ошибка входа " + errorCode.ToString(), errorColor);
+					}
+				}
+				else
+				{
+					await timetable.Update();
+					UpdateTimetableUI();
+					await timetable.Save();
+				}
+			}
+			else
+			{
+				await timetable.Load();
+				ShowMessage("Режим просмотра оффлайн", warningColor);
+				UpdateTimetableUI();
+			}
+			
+			base.OnAppearing();
+		}
 
-			foreach (Day day in timetable.currentWeek.days)
+		private void UpdateTimetableUI()
+		{
+			messageLabel.Text = timetable.CurrentWeek.Name + "\n\n";
+
+			foreach (Day day in timetable.CurrentWeek.Days)
 			{
 				messageLabel.Text += "==========================================\n";
-				messageLabel.Text += day.name + '\n';
+				messageLabel.Text += day.Name + '\n';
 				messageLabel.Text += "==========================================\n\n";
 
-				if (day.bPairs)
+				if (day.ContainPairs)
 				{
-					foreach (Pair pair in day.pairs)
+					foreach (Pair pair in day.Pairs)
 					{
 						messageLabel.Text += "------------------------------------------\n";
-						messageLabel.Text += pair.number + " " + pair.startTime + '\n';
+						messageLabel.Text += pair.Number + " " + pair.StartTime + '\n';
 						messageLabel.Text += "------------------------------------------\n";
 
-						if (pair.bExist)
+						if (pair.IsExist)
 						{
-							messageLabel.Text += pair.name + '\n';
-							messageLabel.Text += pair.classroom + '\n';
-							messageLabel.Text += pair.teacherName + "\n\n";
+							messageLabel.Text += pair.Name + '\n';
+							messageLabel.Text += pair.Classroom + '\n';
+							messageLabel.Text += pair.TeacherName + "\n\n";
 						}
 						else
 						{

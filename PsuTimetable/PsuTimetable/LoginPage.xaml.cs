@@ -79,30 +79,11 @@ namespace PsuTimetable
 					loginButton
 				}
 			};
-
-			if (Credentials.IsSaved())
-			{
-				Login(Credentials.Username, Credentials.Password, true);
-			}
 		}
 
 		private void OnButtonClicked(object sender, EventArgs args)
 		{
 			Login(usernameEntry.Text, passwordEntry.Text, saveCredentialsSwitch.IsToggled);
-		}
-
-		public static bool IsConnectionAvailable()
-		{
-			try
-			{
-				System.Net.Sockets.TcpClient client = new System.Net.Sockets.TcpClient("www.google.com", 80);
-				client.Close();
-				return true;
-			}
-			catch (System.Exception)
-			{
-				return false;
-			}
 		}
 		
 		private async void Login(string username, string password, bool bSaveCredentials)
@@ -113,7 +94,7 @@ namespace PsuTimetable
 				return;
 			}
 
-			if (!IsConnectionAvailable())
+			if (!App.IsConnectionAvailable())
 			{
 				messageLabel.Text = "Не удалось подключиться к сети";
 				return;
