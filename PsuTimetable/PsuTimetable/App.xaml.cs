@@ -33,14 +33,6 @@ namespace PsuTimetable
 			
 		}
 
-		public static async Task<HttpResponseMessage> SendLoginRequest1(string username, string password)
-		{
-			string jsonData = "p_redirect=&p_username=" + HttpUtility.UrlEncode(username, Encoding.GetEncoding(1251)) + "&p_password=" + password;
-			var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
-
-			return await MainClient.PostAsync("stu.login", content);
-		}
-
 		public static async Task<int> SendLoginRequest(string username, string password)
 		{
 			if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
