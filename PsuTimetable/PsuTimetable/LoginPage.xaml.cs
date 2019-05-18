@@ -8,6 +8,7 @@ using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using System.Net.Http;
 using System.Web;
+using System.IO;
 
 namespace PsuTimetable
 {
@@ -24,27 +25,33 @@ namespace PsuTimetable
 			//InitializeComponent();
 
 			Title = "Вход в ЕТИС";
-			Padding = new Thickness(5, 20, 5, 0);
+			Padding = new Thickness(10, 20, 10, 0);
 
 			messageLabel = new Label {
-				HorizontalTextAlignment = TextAlignment.Center
+				HorizontalTextAlignment = TextAlignment.Center,
+				TextColor = Color.OrangeRed
 			};
 
 			usernameEntry = new Entry {
 				Placeholder = "Имя пользователя",
-				ReturnType = ReturnType.Next
+				ReturnType = ReturnType.Next,
+				TextColor = Color.Black,
+				PlaceholderColor = Color.Gray
 			};
 
 			passwordEntry = new Entry {
 				Placeholder = "Пароль",
 				IsPassword = true,
-				ReturnType = ReturnType.Done
+				ReturnType = ReturnType.Done,
+				TextColor = Color.Black,
+				PlaceholderColor = Color.Gray
 			};
 
 			Button loginButton = new Button {
 				Text = "Войти",
 				HorizontalOptions = LayoutOptions.FillAndExpand,
-				TranslationY = 20
+				TranslationY = 20,
+				BackgroundColor = Color.Accent
 			};
 			loginButton.Clicked += OnButtonClicked;
 
@@ -71,7 +78,8 @@ namespace PsuTimetable
 						Children = {
 							new Label {
 								Text = "Запомнить меня",
-								VerticalTextAlignment = TextAlignment.Center
+								VerticalTextAlignment = TextAlignment.Center,
+								TextColor = Color.Black
 							},
 							saveCredentialsSwitch
 						}
@@ -100,8 +108,8 @@ namespace PsuTimetable
 				return;
 			}
 
-			string jsonData = "p_redirect=&p_username=" + HttpUtility.UrlEncode(username, Encoding.GetEncoding(1251)) + "&p_password=" + password;
-			var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+			string postData = "p_redirect=&p_username=" + HttpUtility.UrlEncode(username, Encoding.GetEncoding(1251)) + "&p_password=" + password;
+			var content = new StringContent(postData, Encoding.UTF8, "application/x-www-form-urlencoded");
 
 			HttpResponseMessage response = await App.MainClient.PostAsync("stu.login", content);
 
@@ -112,6 +120,8 @@ namespace PsuTimetable
 			}
 
 			string html = await response.Content.ReadAsStringAsync();
+
+			// //*[@id="form"]/div[2]/div[1]/div
 
 			if (html.Contains("Неверное имя пользователя или пароль"))
 			{
@@ -131,7 +141,7 @@ namespace PsuTimetable
 				await Credentials.Save(username, password);
 			}
 
-			Navigation.InsertPageBefore(new MainPage(), this);
+			Navigation.InsertPageBefore(new MainTabbedPage(), this);
 			await Navigation.PopAsync();
 		}
 	}

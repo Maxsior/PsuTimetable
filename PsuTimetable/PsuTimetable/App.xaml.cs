@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Web;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 
 [assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 namespace PsuTimetable
@@ -30,7 +31,7 @@ namespace PsuTimetable
 			{
 				MainPage = new NavigationPage(new LoginPage());
 			}
-			
+
 		}
 
 		public static async Task<int> SendLoginRequest(string username, string password)
@@ -40,8 +41,8 @@ namespace PsuTimetable
 				return 1;
 			}
 
-			string jsonData = "p_redirect=&p_username=" + HttpUtility.UrlEncode(username, Encoding.GetEncoding(1251)) + "&p_password=" + password;
-			var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+			string postData = "p_redirect=&p_username=" + HttpUtility.UrlEncode(username, Encoding.GetEncoding(1251)) + "&p_password=" + password;
+			var content = new StringContent(postData, Encoding.UTF8, "application/x-www-form-urlencoded");
 
 			HttpResponseMessage response = await MainClient.PostAsync("stu.login", content);
 
@@ -60,7 +61,7 @@ namespace PsuTimetable
 			{
 				return 4;
 			}
-			
+
 			return 0;
 		}
 

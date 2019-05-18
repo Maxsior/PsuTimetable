@@ -4,90 +4,85 @@ using System.Text;
 using System.Net.Http;
 using HtmlAgilityPack;
 using System.Threading.Tasks;
-using SQLite;
 using System.IO;
-using SQLiteNetExtensions.Attributes;
-using SQLiteNetExtensionsAsync.Extensions;
+using System.Web;
+using System.Xml.Serialization;
 
 namespace PsuTimetable
 {
-	[Table("Pairs")]
 	public class Pair
 	{
-		[PrimaryKey, AutoIncrement]
-		public int Id { get; set; }
-
 		public bool IsExist { get; set; }
 		public string Name { get; set; }
 		public string Number { get; set; }
 		public string StartTime { get; set; }
 		public string TeacherName { get; set; }
 		public string Classroom { get; set; }
-
-		[ForeignKey(typeof(Day))]
-		public int DayId { get; set; }
 	}
 
-	[Table("Days")]
 	public class Day
 	{
-		[PrimaryKey, AutoIncrement]
-		public int Id { get; set; }
-
 		public bool ContainPairs { get; set; }
 		public string Name { get; set; }
-		
-		[OneToMany(CascadeOperations = CascadeOperation.All)]
 		public List<Pair> Pairs { get; set; }
-
 		public Day() => Pairs = new List<Pair>();
-
-		[ForeignKey(typeof(Week))]
-		public int WeekId { get; set; }
 	}
 
-	[Table("Weeks")]
 	public class Week
 	{
-		[PrimaryKey, AutoIncrement]
-		public int Id { get; set; }
-
 		public int Number { get; set; }
 		public string Name { get; set; }
-
-		[OneToMany(CascadeOperations = CascadeOperation.All)]
 		public List<Day> Days { get; set; }
-
 		public Week() => Days = new List<Day>();
 	}
 
 	public class Timetable
     {
-		readonly SQLiteAsyncConnection database;
-
 		// Store currentWeekId in database
-		private int currentWeekId;
+		public int currentWeekId;
 		public List<Week> Weeks { get; set; }
 		public Week CurrentWeek => Weeks[currentWeekId];
 
 		public Timetable()
 		{
-			string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Timetable.db");
-			database = new SQLiteAsyncConnection(path);
-			database.CreateTableAsync<Week>().Wait();
-			database.CreateTableAsync<Day>().Wait();
-			database.CreateTableAsync<Pair>().Wait();
 			Weeks = new List<Week>();
 		}
 
-		public async Task Save()
+		public bool IsSaved()
 		{
-			await database.InsertAllWithChildrenAsync(Weeks, recursive: true);
+			string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "timetable.xml");
+			return File.Exists(filePath);
 		}
 
-		public async Task Load()
+		public void Save()
 		{
-			Weeks = await database.GetAllWithChildrenAsync<Week>(recursive: true);
+			string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "timetable.xml");
+
+			using (var writer = File.OpenWrite(filePath))
+			{
+				var serializer = new XmlSerializer(typeof(List<Week>));
+				serializer.Serialize(writer, Weeks);
+			}
+		}
+		
+		public bool Load()
+		{
+			string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "timetable.xml");
+
+			if (File.Exists(filePath))
+			{
+				string text = File.ReadAllText(filePath);
+
+				using (var reader = new StringReader(text))
+				{
+					var serializer = new XmlSerializer(typeof(List<Week>));
+					Weeks = (List<Week>)serializer.Deserialize(reader);
+
+					return Weeks.Count != 0;
+				}
+			}
+
+			return false;
 		}
 
 		public async Task Update()

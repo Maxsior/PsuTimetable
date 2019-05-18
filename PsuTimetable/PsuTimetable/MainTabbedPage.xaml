@@ -7,24 +7,20 @@
             android:TabbedPage.IsSwipePagingEnabled="False"
             BackgroundColor="Accent">
 
-    <ContentPage Title="Будильник" BackgroundColor="White"/>
+    <!--<Page.ToolbarItems>
+        <ToolbarItem Icon="@drawable/round_account_circle_24"/>
+    </Page.ToolbarItems>-->
+
+    <ContentPage x:Name="alarmPage" Title="Будильник" BackgroundColor="White" Icon="@drawable/round_alarm_24"/>
     <TabbedPage xmlns:android="clr-namespace:Xamarin.Forms.PlatformConfiguration.AndroidSpecific;assembly=Xamarin.Forms.Core"
+                x:Name="shedulePage"
                 Title="Расписание"
                 BackgroundColor="White"
                 BarBackgroundColor="White"
                 android:TabbedPage.BarItemColor="Gray"
-                android:TabbedPage.BarSelectedItemColor="Black">
-        
-        <ContentPage Title="1 февраля"/>
-        <ContentPage Title="2 февраля"/>
-        <ContentPage Title="3 февраля"/>
-        <ContentPage Title="4 февраля"/>
-        <ContentPage Title="5 февраля"/>
-        <ContentPage Title="6 февраля"/>
-        <ContentPage Title="7 февраля"/>
-        <ContentPage Title="8 февраля"/>
-        <ContentPage Title="9 февраля"/>
+                android:TabbedPage.BarSelectedItemColor="Black"
+                Icon="@drawable/round_today_24">
     </TabbedPage>
-    <ContentPage Title="Настройки" BackgroundColor="White"/>
-    
+    <ContentPage x:Name="settingsPage" Title="Настройки" BackgroundColor="White" Icon="@drawable/round_settings_24"/>
+
 </TabbedPage>
