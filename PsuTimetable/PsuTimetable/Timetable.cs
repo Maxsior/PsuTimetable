@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Net.Http;
 using HtmlAgilityPack;
 using System.Threading.Tasks;
 using System.IO;
-using System.Web;
 using System.Xml.Serialization;
 
 namespace PsuTimetable
@@ -36,56 +34,69 @@ namespace PsuTimetable
 		public Week() => Days = new List<Day>();
 	}
 
-	public class Timetable
-    {
-		// Store currentWeekId in database
-		public int currentWeekId;
+	public class TimetableData
+	{
+		public int CurrentWeekId { get; set; }
 		public List<Week> Weeks { get; set; }
-		public Week CurrentWeek => Weeks[currentWeekId];
+		public DateTime LastUpdateTime { get; set; }
 
-		public Timetable()
+		public TimetableData() => Weeks = new List<Week>();
+	}
+
+	public static class Timetable
+	{
+		private static TimetableData timetableData = new TimetableData();
+		private static string timetableFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "timetable.xml");
+
+		public static List<Week> GetWeeks()
 		{
-			Weeks = new List<Week>();
+			return timetableData.Weeks;
 		}
 
-		public bool IsSaved()
+		public static int GetCurrentWeekId()
 		{
-			string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "timetable.xml");
-			return File.Exists(filePath);
+			return timetableData.CurrentWeekId;
 		}
 
-		public void Save()
+		public static DateTime GetLastUpdate()
 		{
-			string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "timetable.xml");
+			return timetableData.LastUpdateTime;
+		}
 
-			using (var writer = File.OpenWrite(filePath))
+		public static bool NeedUpdate()
+		{
+			TimeSpan interval = DateTime.Now.Date - timetableData.LastUpdateTime.Date;
+			return interval.TotalDays > 0;
+		}
+
+		public static void Save()
+		{
+			using (var writer = File.OpenWrite(timetableFilePath))
 			{
-				var serializer = new XmlSerializer(typeof(List<Week>));
-				serializer.Serialize(writer, Weeks);
+				var serializer = new XmlSerializer(typeof(TimetableData));
+				serializer.Serialize(writer, timetableData);
 			}
 		}
-		
-		public bool Load()
-		{
-			string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "timetable.xml");
 
-			if (File.Exists(filePath))
+		public static bool Load()
+		{
+			if (File.Exists(timetableFilePath))
 			{
-				string text = File.ReadAllText(filePath);
+				string text = File.ReadAllText(timetableFilePath);
 
 				using (var reader = new StringReader(text))
 				{
-					var serializer = new XmlSerializer(typeof(List<Week>));
-					Weeks = (List<Week>)serializer.Deserialize(reader);
+					var serializer = new XmlSerializer(typeof(TimetableData));
+					timetableData = (TimetableData)serializer.Deserialize(reader);
 
-					return Weeks.Count != 0;
+					return true;
 				}
 			}
 
 			return false;
 		}
 
-		public async Task Update()
+		public static async Task Update()
 		{
 			HttpResponseMessage response = await App.MainClient.GetAsync("stu.timetable");
 			string html = await response.Content.ReadAsStringAsync();
@@ -115,14 +126,16 @@ namespace PsuTimetable
 						startWeekNumber = weekNumber;
 
 					week = await InitWeek(weekNumber);
-					currentWeekId = weekNumber - startWeekNumber;
+					timetableData.CurrentWeekId = weekNumber - startWeekNumber;
 				}
 
-				Weeks.Add(week);
+				timetableData.Weeks.Add(week);
 			}
+
+			timetableData.LastUpdateTime = DateTime.Now;
 		}
 
-		public async Task<Week> InitWeek(int weekNumber)
+		private static async Task<Week> InitWeek(int weekNumber)
 		{
 			HttpResponseMessage response = await App.MainClient.GetAsync("stu.timetable?p_cons=n&p_week=" + weekNumber.ToString());
 			string html = await response.Content.ReadAsStringAsync();
@@ -142,7 +155,7 @@ namespace PsuTimetable
 			{
 				week.Name = weekNameNode.InnerText.TrimEnd('\n');
 			}
-			
+
 			if (timetableNode != null)
 			{
 				foreach (HtmlNode dayNode in timetableNode.SelectNodes("./div"))

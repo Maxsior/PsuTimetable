@@ -12,11 +12,9 @@ namespace PsuTimetable
 	[XamlCompilation(XamlCompilationOptions.Compile)]
 	public partial class MainTabbedPage : TabbedPage
 	{
-		Timetable timetable;
-
 		Label debugLabel;
 		Entry consoleEntry;
-		int currentWeek = 0;
+		int currentWeekId = 0;
 
 		public MainTabbedPage()
 		{
@@ -41,6 +39,9 @@ namespace PsuTimetable
 			CurrentPage = shedulePage;
 
 			//ToolbarItems.Add(new ToolbarItem { Text = "Search" });
+
+			Timetable.Load();
+			currentWeekId = Timetable.GetCurrentWeekId();
 		}
 
 		private void WriteDebugLine(string text)
@@ -56,14 +57,14 @@ namespace PsuTimetable
 			{
 				debugLabel.Text = "";
 			}
-			else if (consoleEntry.Text.StartsWith("currentWeek="))
+			else if (consoleEntry.Text.StartsWith("currentWeekId="))
 			{
 				int temp;
-				if (int.TryParse(consoleEntry.Text.Substring(12), out temp))
+				if (int.TryParse(consoleEntry.Text.Substring(15), out temp))
 				{
-					if (temp >= 0 && temp < timetable.Weeks.Count)
+					if (temp >= 0 && temp < Timetable.GetWeeks().Count)
 					{
-						currentWeek = temp;
+						currentWeekId = temp;
 						UpdateUI();
 					}
 					else
@@ -74,28 +75,15 @@ namespace PsuTimetable
 			}
 			else if (consoleEntry.Text == "logout")
 			{
-				await Credentials.Clear();
-
-				Navigation.InsertPageBefore(new LoginPage(), this);
-				await Navigation.PopAsync();
+				await Logout();
 			}
 			else if (consoleEntry.Text == "refresh")
 			{
-				await timetable.Update();
-				UpdateUI();
+				await Refresh();
 			}
 			else if (consoleEntry.Text == "currentWeekId")
 			{
-				WriteDebugLine(timetable.currentWeekId.ToString());
-			}
-			else if (consoleEntry.Text == "save")
-			{
-				timetable.Save();
-			}
-			else if (consoleEntry.Text == "load")
-			{
-				timetable.Load();
-				UpdateUI();
+				WriteDebugLine(Timetable.GetCurrentWeekId().ToString());
 			}
 			else
 			{
@@ -103,50 +91,68 @@ namespace PsuTimetable
 			}
 		}
 
-		protected override async void OnAppearing()
+		private async Task Logout()
 		{
-			timetable = new Timetable();
+			await Credentials.Clear();
 
+			Navigation.InsertPageBefore(new LoginPage(), this);
+			await Navigation.PopAsync();
+		}
+
+		private async Task Refresh()
+		{
 			if (App.IsConnectionAvailable())
 			{
-				bool bSuccess = false;
-
-				if (Credentials.IsSaved())
+				if (!App.IsSignedIn && Credentials.IsSaved())
 				{
 					// Add authorization indicator
 					int errorCode = await App.SendLoginRequest(Credentials.Username, Credentials.Password);
 
 					if (errorCode == 0)
 					{
-						bSuccess = true;
+						App.IsSignedIn = true;
 					}
 					else
 					{
 						WriteDebugLine("Ошибка входа: " + errorCode.ToString());
 					}
 				}
-				else
-				{
-					bSuccess = true;
-				}
 
-				if (bSuccess)
+				if (App.IsSignedIn)
 				{
 					// Add refresh indicator
-					await timetable.Update();
-					timetable.Save();
+					await Timetable.Update();
+					Timetable.Save();
+
+					currentWeekId = Timetable.GetCurrentWeekId();
 					UpdateUI();
+
+					WriteDebugLine("Обновлено только что");
 				}
 			}
 			else
 			{
-				WriteDebugLine("Режим просмотра оффлайн");
-
-				if (!timetable.Load())
+				if (Timetable.Load())
+				{
+					WriteDebugLine("Режим просмотра оффлайн");
+					UpdateUI();
+				}
+				else
 				{
 					WriteDebugLine("Не удалось загрузить расписание");
 				}
+			}
+		}
 
+		protected override async void OnAppearing()
+		{
+			if (Timetable.NeedUpdate())
+			{
+				await Refresh();
+			}
+			else
+			{
+				WriteDebugLine("Обновлено " + Timetable.GetLastUpdate().ToShortDateString());
 				UpdateUI();
 			}
 
@@ -178,7 +184,8 @@ namespace PsuTimetable
 			shedulePage.Children.Add(debugPage);
 
 			// Days pages
-			foreach (Day day in timetable.Weeks[currentWeek].Days)
+			var weeks = Timetable.GetWeeks();
+			foreach (Day day in weeks[currentWeekId].Days)
 			{
 				Label label = new Label
 				{

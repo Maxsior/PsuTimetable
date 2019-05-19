@@ -51,7 +51,8 @@ namespace PsuTimetable
 				Text = "Войти",
 				HorizontalOptions = LayoutOptions.FillAndExpand,
 				TranslationY = 20,
-				BackgroundColor = Color.Accent
+				BackgroundColor = Color.Accent,
+				CornerRadius = 50
 			};
 			loginButton.Clicked += OnButtonClicked;
 
@@ -140,6 +141,8 @@ namespace PsuTimetable
 			{
 				await Credentials.Save(username, password);
 			}
+
+			App.IsSignedIn = true;
 
 			Navigation.InsertPageBefore(new MainTabbedPage(), this);
 			await Navigation.PopAsync();

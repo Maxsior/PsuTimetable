@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 using Xamarin.Forms;
-using Xamarin.Forms.PlatformConfiguration.AndroidSpecific;
 
 namespace PsuTimetable
 {
@@ -13,25 +9,34 @@ namespace PsuTimetable
 	{
 		Label infoLabel;
 		Frame infoFrame;
-		Label messageLabel;
-		Timetable timetable;
+		Label timetableLabel;
 
-		Color warningColor = Color.FromHex("#ffa000"); // #ffa000 #ffab00
-		Color errorColor = Color.FromHex("#d1321c");
+		Color warningColor = Color.FromHex("#FFA000");
+		Color errorColor = Color.FromHex("#D1321C");
+		Color infoColor = Color.FromHex("#8BC34A");
 
 		public MainPage()
 		{
 			//InitializeComponent();
-			
+
 			Title = "Расписание";
-			
-			var toolbarItem = new ToolbarItem {
+
+			var logoutToolbarItem = new ToolbarItem
+			{
 				Text = "Выход"
 			};
-			toolbarItem.Clicked += OnLogoutButtonClicked;
-			ToolbarItems.Add(toolbarItem);
+			var refreshToolbarItem = new ToolbarItem
+			{
+				Text = "Обновить"
+			};
+			logoutToolbarItem.Clicked += LogoutToolbarItem_Clicked;
+			refreshToolbarItem.Clicked += RefreshToolbarItem_Clicked;
 
-			infoLabel = new Label {
+			ToolbarItems.Add(logoutToolbarItem);
+			ToolbarItems.Add(refreshToolbarItem);
+
+			infoLabel = new Label
+			{
 				HorizontalOptions = LayoutOptions.CenterAndExpand,
 				VerticalOptions = LayoutOptions.CenterAndExpand,
 				TextColor = Color.White
@@ -39,7 +44,7 @@ namespace PsuTimetable
 
 			infoFrame = new Frame
 			{
-				BackgroundColor = warningColor,
+				BackgroundColor = Color.White,
 				HorizontalOptions = LayoutOptions.FillAndExpand,
 				HeightRequest = 30,
 				CornerRadius = 0,
@@ -47,19 +52,25 @@ namespace PsuTimetable
 				Content = infoLabel
 			};
 
-			messageLabel = new Label {
+			timetableLabel = new Label
+			{
 				HorizontalOptions = LayoutOptions.Center
 			};
-			
-			Content = new StackLayout {
+
+			Content = new StackLayout
+			{
+				BackgroundColor = Color.White,
 				Children = {
 					infoFrame,
 					new ScrollView {
 						VerticalOptions = LayoutOptions.FillAndExpand,
-						Content = messageLabel
+						Padding = new Thickness(10, 0, 10, 0),
+						Content = timetableLabel
 					}
 				}
 			};
+
+			Timetable.Load();
 		}
 
 		private void ShowMessage(string text, Color color)
@@ -67,13 +78,18 @@ namespace PsuTimetable
 			infoLabel.Text = text;
 			infoFrame.BackgroundColor = color;
 		}
-		
-		private void OnLogoutButtonClicked(object sender, EventArgs e)
+
+		private async void LogoutToolbarItem_Clicked(object sender, EventArgs e)
 		{
-			Logout();
+			await Logout();
 		}
 
-		private async void Logout()
+		private async void RefreshToolbarItem_Clicked(object sender, EventArgs e)
+		{
+			await Refresh();
+		}
+
+		private async Task Logout()
 		{
 			await Credentials.Clear();
 
@@ -81,80 +97,103 @@ namespace PsuTimetable
 			await Navigation.PopAsync();
 		}
 
-		protected override async void OnAppearing()
+		private async Task Refresh()
 		{
-			timetable = new Timetable();
-			
 			if (App.IsConnectionAvailable())
 			{
-				if (Credentials.IsSaved())
+				if (!App.IsSignedIn && Credentials.IsSaved())
 				{
+					// Add authorization indicator
 					int errorCode = await App.SendLoginRequest(Credentials.Username, Credentials.Password);
 
 					if (errorCode == 0)
 					{
-						await timetable.Update();
-						UpdateTimetableUI();
-						await timetable.Save();
+						App.IsSignedIn = true;
 					}
 					else
 					{
-						ShowMessage("Ошибка входа " + errorCode.ToString(), errorColor);
+						ShowMessage("Ошибка входа: " + errorCode.ToString(), errorColor);
 					}
 				}
-				else
+
+				if (App.IsSignedIn)
 				{
-					await timetable.Update();
-					UpdateTimetableUI();
-					await timetable.Save();
+					// Add refresh indicator
+					await Timetable.Update();
+					Timetable.Save();
+					UpdateUI();
+
+					ShowMessage("Обновлено только что", infoColor);
 				}
 			}
 			else
 			{
-				await timetable.Load();
-				ShowMessage("Режим просмотра оффлайн", warningColor);
-				UpdateTimetableUI();
+				if (Timetable.Load())
+				{
+					ShowMessage("Режим просмотра оффлайн", warningColor);
+					UpdateUI();
+				}
+				else
+				{
+					ShowMessage("Не удалось загрузить расписание", errorColor);
+				}
 			}
-			
+		}
+
+		protected override async void OnAppearing()
+		{
+			if (Timetable.NeedUpdate())
+			{
+				await Refresh();
+			}
+			else
+			{
+				ShowMessage("Обновлено " + Timetable.GetLastUpdate().ToShortDateString(), infoColor);
+				UpdateUI();
+			}
+
 			base.OnAppearing();
 		}
 
-		private void UpdateTimetableUI()
+		private void UpdateUI()
 		{
-			messageLabel.Text = timetable.CurrentWeek.Name + "\n\n";
+			var weeks = Timetable.GetWeeks();
+			int currentWeekId = Timetable.GetCurrentWeekId();
+			var currentWeek = weeks[currentWeekId];
 
-			foreach (Day day in timetable.CurrentWeek.Days)
+			timetableLabel.Text = "[" + currentWeek.Number + "] " + currentWeek.Name + "\n\n";
+
+			foreach (Day day in currentWeek.Days)
 			{
-				messageLabel.Text += "==========================================\n";
-				messageLabel.Text += day.Name + '\n';
-				messageLabel.Text += "==========================================\n\n";
+				timetableLabel.Text += "==========================================\n";
+				timetableLabel.Text += day.Name + '\n';
+				timetableLabel.Text += "==========================================\n\n";
 
 				if (day.ContainPairs)
 				{
 					foreach (Pair pair in day.Pairs)
 					{
-						messageLabel.Text += "------------------------------------------\n";
-						messageLabel.Text += pair.Number + " " + pair.StartTime + '\n';
-						messageLabel.Text += "------------------------------------------\n";
+						timetableLabel.Text += "------------------------------------------\n";
+						timetableLabel.Text += pair.Number + " " + pair.StartTime + '\n';
+						timetableLabel.Text += "------------------------------------------\n";
 
 						if (pair.IsExist)
 						{
-							messageLabel.Text += pair.Name + '\n';
-							messageLabel.Text += pair.Classroom + '\n';
-							messageLabel.Text += pair.TeacherName + "\n\n";
+							timetableLabel.Text += pair.Name + '\n';
+							timetableLabel.Text += pair.Classroom + '\n';
+							timetableLabel.Text += pair.TeacherName + "\n\n";
 						}
 						else
 						{
-							messageLabel.Text += "Пары нет\n\n";
+							timetableLabel.Text += "Пары нет\n\n";
 						}
 					}
 				}
 				else
 				{
-					messageLabel.Text += "Пар нет\n\n";
+					timetableLabel.Text += "Пар нет\n\n";
 				}
 			}
-
 		}
 	}
 }

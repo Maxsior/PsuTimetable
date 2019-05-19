@@ -13,6 +13,7 @@ namespace PsuTimetable
 	public partial class App : Application
 	{
 		public static HttpClient MainClient { get; set; }
+		public static bool IsSignedIn { get; set; }
 
 		public App()
 		{
