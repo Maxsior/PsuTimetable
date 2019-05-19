@@ -12,6 +12,7 @@ namespace PsuTimetable
 	public partial class App : Application
 	{
 		public static HttpClient MainClient { get; set; }
+		public static bool IsSignedIn { get; set; }
 
 		public App()
 		{
@@ -40,8 +41,8 @@ namespace PsuTimetable
 				return 1;
 			}
 
-			string jsonData = "p_redirect=&p_username=" + HttpUtility.UrlEncode(username, Encoding.GetEncoding(1251)) + "&p_password=" + password;
-			var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+			string postData = "p_redirect=&p_username=" + HttpUtility.UrlEncode(username, Encoding.GetEncoding(1251)) + "&p_password=" + password;
+			var content = new StringContent(postData, Encoding.UTF8, "application/x-www-form-urlencoded");
 
 			HttpResponseMessage response = await MainClient.PostAsync("stu.login", content);
 

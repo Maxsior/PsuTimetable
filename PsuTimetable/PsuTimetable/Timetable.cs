@@ -1,96 +1,102 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Net.Http;
 using HtmlAgilityPack;
 using System.Threading.Tasks;
-using SQLite;
 using System.IO;
-using SQLiteNetExtensions.Attributes;
-using SQLiteNetExtensionsAsync.Extensions;
+using System.Xml.Serialization;
 
 namespace PsuTimetable
 {
-	[Table("Pairs")]
 	public class Pair
 	{
-		[PrimaryKey, AutoIncrement]
-		public int Id { get; set; }
-
 		public bool IsExist { get; set; }
 		public string Name { get; set; }
 		public string Number { get; set; }
 		public string StartTime { get; set; }
 		public string TeacherName { get; set; }
 		public string Classroom { get; set; }
-
-		[ForeignKey(typeof(Day))]
-		public int DayId { get; set; }
 	}
 
-	[Table("Days")]
 	public class Day
 	{
-		[PrimaryKey, AutoIncrement]
-		public int Id { get; set; }
-
 		public bool ContainPairs { get; set; }
 		public string Name { get; set; }
-		
-		[OneToMany(CascadeOperations = CascadeOperation.All)]
 		public List<Pair> Pairs { get; set; }
-
 		public Day() => Pairs = new List<Pair>();
-
-		[ForeignKey(typeof(Week))]
-		public int WeekId { get; set; }
 	}
 
-	[Table("Weeks")]
 	public class Week
 	{
-		[PrimaryKey, AutoIncrement]
-		public int Id { get; set; }
-
 		public int Number { get; set; }
 		public string Name { get; set; }
-
-		[OneToMany(CascadeOperations = CascadeOperation.All)]
 		public List<Day> Days { get; set; }
-
 		public Week() => Days = new List<Day>();
 	}
 
-	public class Timetable
-    {
-		readonly SQLiteAsyncConnection database;
-
-		// Store currentWeekId in database
-		private int currentWeekId;
+	public class TimetableData
+	{
+		public int CurrentWeekId { get; set; }
 		public List<Week> Weeks { get; set; }
-		public Week CurrentWeek => Weeks[currentWeekId];
+		public DateTime LastUpdateTime { get; set; }
 
-		public Timetable()
+		public TimetableData() => Weeks = new List<Week>();
+	}
+
+	public static class Timetable
+	{
+		private static TimetableData timetableData = new TimetableData();
+		private static string timetableFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "timetable.xml");
+
+		public static List<Week> GetWeeks()
 		{
-			string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Timetable.db");
-			database = new SQLiteAsyncConnection(path);
-			database.CreateTableAsync<Week>().Wait();
-			database.CreateTableAsync<Day>().Wait();
-			database.CreateTableAsync<Pair>().Wait();
-			Weeks = new List<Week>();
+			return timetableData.Weeks;
 		}
 
-		public async Task Save()
+		public static int GetCurrentWeekId()
 		{
-			await database.InsertAllWithChildrenAsync(Weeks, recursive: true);
+			return timetableData.CurrentWeekId;
 		}
 
-		public async Task Load()
+		public static DateTime GetLastUpdate()
 		{
-			Weeks = await database.GetAllWithChildrenAsync<Week>(recursive: true);
+			return timetableData.LastUpdateTime;
 		}
 
-		public async Task Update()
+		public static bool NeedUpdate()
+		{
+			TimeSpan interval = DateTime.Now.Date - timetableData.LastUpdateTime.Date;
+			return interval.TotalDays > 0;
+		}
+
+		public static void Save()
+		{
+			using (var writer = File.OpenWrite(timetableFilePath))
+			{
+				var serializer = new XmlSerializer(typeof(TimetableData));
+				serializer.Serialize(writer, timetableData);
+			}
+		}
+
+		public static bool Load()
+		{
+			if (File.Exists(timetableFilePath))
+			{
+				string text = File.ReadAllText(timetableFilePath);
+
+				using (var reader = new StringReader(text))
+				{
+					var serializer = new XmlSerializer(typeof(TimetableData));
+					timetableData = (TimetableData)serializer.Deserialize(reader);
+
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		public static async Task Update()
 		{
 			HttpResponseMessage response = await App.MainClient.GetAsync("stu.timetable");
 			string html = await response.Content.ReadAsStringAsync();
@@ -120,14 +126,16 @@ namespace PsuTimetable
 						startWeekNumber = weekNumber;
 
 					week = await InitWeek(weekNumber);
-					currentWeekId = weekNumber - startWeekNumber;
+					timetableData.CurrentWeekId = weekNumber - startWeekNumber;
 				}
 
-				Weeks.Add(week);
+				timetableData.Weeks.Add(week);
 			}
+
+			timetableData.LastUpdateTime = DateTime.Now;
 		}
 
-		public async Task<Week> InitWeek(int weekNumber)
+		private static async Task<Week> InitWeek(int weekNumber)
 		{
 			HttpResponseMessage response = await App.MainClient.GetAsync("stu.timetable?p_cons=n&p_week=" + weekNumber.ToString());
 			string html = await response.Content.ReadAsStringAsync();
@@ -147,7 +155,7 @@ namespace PsuTimetable
 			{
 				week.Name = weekNameNode.InnerText.TrimEnd('\n');
 			}
-			
+
 			if (timetableNode != null)
 			{
 				foreach (HtmlNode dayNode in timetableNode.SelectNodes("./div"))

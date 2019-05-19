@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using System.Net.Http;
@@ -100,8 +96,8 @@ namespace PsuTimetable
 				return;
 			}
 
-			string jsonData = "p_redirect=&p_username=" + HttpUtility.UrlEncode(username, Encoding.GetEncoding(1251)) + "&p_password=" + password;
-			var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+			string postData = "p_redirect=&p_username=" + HttpUtility.UrlEncode(username, Encoding.GetEncoding(1251)) + "&p_password=" + password;
+			var content = new StringContent(postData, Encoding.UTF8, "application/x-www-form-urlencoded");
 
 			HttpResponseMessage response = await App.MainClient.PostAsync("stu.login", content);
 
@@ -130,6 +126,8 @@ namespace PsuTimetable
 			{
 				await Credentials.Save(username, password);
 			}
+
+			App.IsSignedIn = true;
 
 			Navigation.InsertPageBefore(new MainPage(), this);
 			await Navigation.PopAsync();
