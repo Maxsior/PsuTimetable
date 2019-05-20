@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -216,6 +217,13 @@ namespace PsuTimetable
 				}
 
 				shedulePage.Children.Add(page);
+
+				string dayOfWeek = day.Name.Split(',')[0].ToLower();
+				string currentDayOfWeek = CultureInfo.GetCultureInfo("ru-RU").DateTimeFormat.GetDayName(DateTime.Now.DayOfWeek);
+				if (dayOfWeek == currentDayOfWeek)
+				{
+					shedulePage.CurrentPage = page;
+				}
 			}
 		}
 	}
