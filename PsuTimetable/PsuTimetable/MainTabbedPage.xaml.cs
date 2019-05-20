@@ -39,6 +39,16 @@ namespace PsuTimetable
 
 			Timetable.Load();
 			currentWeekId = Timetable.GetCurrentWeekId();
+
+			if (Timetable.NeedUpdate())
+			{
+				Refresh();
+			}
+			else
+			{
+				WriteDebugLine("Обновлено " + Timetable.GetLastUpdate().ToShortDateString());
+				UpdateUI();
+			}
 		}
 
 		private void WriteDebugLine(string text)
@@ -140,21 +150,6 @@ namespace PsuTimetable
 					WriteDebugLine("Не удалось загрузить расписание");
 				}
 			}
-		}
-
-		protected override async void OnAppearing()
-		{
-			if (Timetable.NeedUpdate())
-			{
-				await Refresh();
-			}
-			else
-			{
-				WriteDebugLine("Обновлено " + Timetable.GetLastUpdate().ToShortDateString());
-				UpdateUI();
-			}
-
-			base.OnAppearing();
 		}
 
 		private void UpdateUI()
