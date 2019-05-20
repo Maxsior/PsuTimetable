@@ -65,8 +65,8 @@ namespace PsuTimetable
 
 		public static bool NeedUpdate()
 		{
-			//TimeSpan interval = DateTime.Now.Date - timetableData.LastUpdateTime.Date;
-			return !File.Exists(timetableFilePath); // || interval.TotalDays > 0;
+			TimeSpan interval = DateTime.Now.Date - timetableData.LastUpdateTime.Date;
+			return !File.Exists(timetableFilePath) || (DateTime.Now.DayOfWeek == DayOfWeek.Monday && interval.TotalDays > 0);
 		}
 
 		public static void Save()
