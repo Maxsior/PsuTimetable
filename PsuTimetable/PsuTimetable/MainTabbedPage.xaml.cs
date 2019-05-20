@@ -33,10 +33,25 @@ namespace PsuTimetable
 			};
 			consoleEntry.Completed += ConsoleEntry_Completed;
 
+			// Placeholder page
+			Page placeholderPage = new ContentPage
+			{
+				Content = new Label
+				{
+					HorizontalOptions = LayoutOptions.FillAndExpand,
+					VerticalOptions = LayoutOptions.FillAndExpand,
+					HorizontalTextAlignment = TextAlignment.Center,
+					VerticalTextAlignment = TextAlignment.Center,
+					TextColor = Color.Gray,
+					Text = "Обновление...",
+					FontSize = 20
+				}
+			};
+			shedulePage.Children.Add(placeholderPage);
+
 			CurrentPage = shedulePage;
 
-			//ToolbarItems.Add(new ToolbarItem { Text = "Search" });
-
+			// Load and update timetable
 			Timetable.Load();
 			currentWeekId = Timetable.GetCurrentWeekId();
 
