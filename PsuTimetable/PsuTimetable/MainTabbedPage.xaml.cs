@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -60,7 +56,7 @@ namespace PsuTimetable
 			else if (consoleEntry.Text.StartsWith("currentWeekId="))
 			{
 				int temp;
-				if (int.TryParse(consoleEntry.Text.Substring(15), out temp))
+				if (int.TryParse(consoleEntry.Text.Substring(14), out temp))
 				{
 					if (temp >= 0 && temp < Timetable.GetWeeks().Count)
 					{
@@ -93,6 +89,7 @@ namespace PsuTimetable
 
 		private async Task Logout()
 		{
+			Timetable.Clear();
 			await Credentials.Clear();
 
 			Navigation.InsertPageBefore(new LoginPage(), this);
@@ -187,42 +184,36 @@ namespace PsuTimetable
 			var weeks = Timetable.GetWeeks();
 			foreach (Day day in weeks[currentWeekId].Days)
 			{
-				Label label = new Label
-				{
-					HorizontalOptions = LayoutOptions.Center,
-					TextColor = Color.Black
-				};
-
-				ListView listView = new ListView
-				{
-					SeparatorVisibility = SeparatorVisibility.None,
-					SelectionMode = ListViewSelectionMode.None,
-					IsPullToRefreshEnabled = true
-				};
-
-				var list = new List<string>();
-				listView.SeparatorColor = Color.Gray;
-				listView.SelectionMode = ListViewSelectionMode.None;
-
-				if (day.ContainPairs)
-				{
-					foreach (Pair pair in day.Pairs)
-					{
-						list.Add(pair.Number + " " + pair.StartTime + " | " + (pair.IsExist ? pair.Name : "Пары нет"));
-					}
-				}
-				else
-				{
-					list.Add("Пар нет");
-				}
-
-				listView.ItemsSource = list;
-
 				ContentPage page = new ContentPage
 				{
 					Title = day.Name,
-					Content = listView
+					Padding = new Thickness(0, 10, 5, 0)
 				};
+
+				if (day.Pairs.Count == 0)
+				{
+					page.Content = new Label
+					{
+						HorizontalOptions = LayoutOptions.FillAndExpand,
+						VerticalOptions = LayoutOptions.FillAndExpand,
+						HorizontalTextAlignment = TextAlignment.Center,
+						VerticalTextAlignment = TextAlignment.Center,
+						TextColor = Color.Gray,
+						Text = "Пар нет!",
+						FontSize = 20
+					};
+				}
+				else
+				{
+					page.Content = new ListView
+					{
+						SeparatorVisibility = SeparatorVisibility.None,
+						RowHeight = 70,
+						SelectionMode = ListViewSelectionMode.None,
+						ItemTemplate = new DataTemplate(typeof(PairCell)),
+						ItemsSource = day.Pairs
+					};
+				}
 
 				shedulePage.Children.Add(page);
 			}

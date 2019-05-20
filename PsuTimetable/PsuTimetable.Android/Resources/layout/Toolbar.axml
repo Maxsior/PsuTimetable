@@ -22,7 +22,7 @@
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_gravity="start"
-		android:src="@drawable/round_account_circle_24"
+		android:src="@drawable/outline_account_circle_24"
 		android:backgroundTint="@color/colorPrimary"/>
 
 </android.support.v7.widget.Toolbar>

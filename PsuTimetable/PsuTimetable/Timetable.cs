@@ -46,7 +46,7 @@ namespace PsuTimetable
 	public static class Timetable
 	{
 		private static TimetableData timetableData = new TimetableData();
-		private static string timetableFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "timetable.xml");
+		private static readonly string timetableFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "timetable.xml");
 
 		public static List<Week> GetWeeks()
 		{
@@ -65,8 +65,8 @@ namespace PsuTimetable
 
 		public static bool NeedUpdate()
 		{
-			TimeSpan interval = DateTime.Now.Date - timetableData.LastUpdateTime.Date;
-			return interval.TotalDays > 0;
+			//TimeSpan interval = DateTime.Now.Date - timetableData.LastUpdateTime.Date;
+			return !File.Exists(timetableFilePath); // || interval.TotalDays > 0;
 		}
 
 		public static void Save()
@@ -94,6 +94,11 @@ namespace PsuTimetable
 			}
 
 			return false;
+		}
+
+		public static void Clear()
+		{
+			File.Delete(timetableFilePath);
 		}
 
 		public static async Task Update()
