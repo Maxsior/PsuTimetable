@@ -91,7 +91,9 @@ namespace PsuTimetable
 
 		private async Task Logout()
 		{
+			Timetable.Clear();
 			await Credentials.Clear();
+			App.IsSignedIn = false;
 
 			Navigation.InsertPageBefore(new LoginPage(), this);
 			await Navigation.PopAsync();
