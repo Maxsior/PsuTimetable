@@ -213,9 +213,8 @@ namespace PsuTimetable
 
 				shedulePage.Children.Add(page);
 
-				string dayOfWeek = day.Name.Split(',')[0].ToLower();
-				string currentDayOfWeek = CultureInfo.GetCultureInfo("ru-RU").DateTimeFormat.GetDayName(DateTime.Now.DayOfWeek);
-				if (dayOfWeek == currentDayOfWeek)
+				// Select page with current day
+				if (day.Name.ToLower() == DateTime.Now.ToString("dddd, dd MMMM"))
 				{
 					shedulePage.CurrentPage = page;
 				}
