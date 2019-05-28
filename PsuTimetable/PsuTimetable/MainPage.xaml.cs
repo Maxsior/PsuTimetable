@@ -71,6 +71,7 @@ namespace PsuTimetable
 			};
 
 			Timetable.Load();
+			Teachers.Load();
 		}
 
 		private void ShowMessage(string text, Color color)
@@ -92,6 +93,7 @@ namespace PsuTimetable
 		private async Task Logout()
 		{
 			Timetable.Clear();
+			Teachers.Clear();
 			await Credentials.Clear();
 			App.IsSignedIn = false;
 
@@ -123,6 +125,10 @@ namespace PsuTimetable
 					// Add refresh indicator
 					await Timetable.Update();
 					Timetable.Save();
+
+					await Teachers.Update();
+					Teachers.Save();
+
 					UpdateUI();
 
 					ShowMessage("Обновлено только что", infoColor);
@@ -132,6 +138,8 @@ namespace PsuTimetable
 			{
 				if (Timetable.Load())
 				{
+					Teachers.Load();
+
 					ShowMessage("Режим просмотра оффлайн", warningColor);
 					UpdateUI();
 				}
@@ -168,7 +176,7 @@ namespace PsuTimetable
 			foreach (Day day in currentWeek.Days)
 			{
 				timetableLabel.Text += "==========================================\n";
-				timetableLabel.Text += day.Name + '\n';
+				timetableLabel.Text += day.Name + "\n";
 				timetableLabel.Text += "==========================================\n\n";
 
 				if (day.ContainPairs)
@@ -176,13 +184,13 @@ namespace PsuTimetable
 					foreach (Pair pair in day.Pairs)
 					{
 						timetableLabel.Text += "------------------------------------------\n";
-						timetableLabel.Text += pair.Number + " " + pair.StartTime + '\n';
+						timetableLabel.Text += pair.Number + " " + pair.StartTime + "\n";
 						timetableLabel.Text += "------------------------------------------\n";
 
 						if (pair.IsExist)
 						{
-							timetableLabel.Text += pair.Name + '\n';
-							timetableLabel.Text += pair.Classroom + '\n';
+							timetableLabel.Text += pair.Name + "\n";
+							timetableLabel.Text += pair.Classroom + "\n";
 							timetableLabel.Text += pair.TeacherName + "\n\n";
 						}
 						else
@@ -195,6 +203,19 @@ namespace PsuTimetable
 				{
 					timetableLabel.Text += "Пар нет\n\n";
 				}
+			}
+
+			timetableLabel.Text += "\n==========================================\n";
+			timetableLabel.Text += "Преподаватели\n";
+			timetableLabel.Text += "==========================================\n\n";
+
+			var teachers = Teachers.GetTeachers();
+			foreach (Teacher teacher in teachers)
+			{
+				timetableLabel.Text += teacher.Name + "\n";
+				timetableLabel.Text += teacher.Chair + "\n";
+				timetableLabel.Text += teacher.Description + "\n";
+				timetableLabel.Text += teacher.ImageUri + "\n\n";
 			}
 		}
 	}
