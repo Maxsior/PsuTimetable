@@ -235,5 +235,15 @@ namespace PsuTimetable
 				}
 			}
 		}
+
+		private async void UpdateButton_Clicked(object sender, EventArgs e)
+		{
+			await Refresh();
+		}
+
+		private void AccountButton_Clicked(object sender, EventArgs e)
+		{
+			DisplayAlert("Фамилия Имя Отчество", "Факультет", "Выйти");
+		}
 	}
 }

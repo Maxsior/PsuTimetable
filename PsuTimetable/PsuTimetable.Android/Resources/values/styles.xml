@@ -17,6 +17,9 @@
     <item name="android:datePickerDialogTheme">@style/AppCompatDialogStyle</item>
     <item name="colorControlNormal">#ff808080</item>
     <item name="android:colorForeground">@android:color/darker_gray</item>
+    <item name="android:textAppearanceButton">@style/MyTextAppearance.Material.Button</item>
+    <!--<item name="android:buttonStyle">@style/button_style</item>-->
+    <item name="android:alertDialogTheme">@style/MyDialogTheme</item>
   </style>
 
   <style name="AppCompatDialogStyle" parent="Theme.AppCompat.Light.Dialog">
@@ -28,7 +31,22 @@
   </style>
 
   <style name="MineCustomTabText" parent="TextAppearance.Design.Tab">
-    <item name="android:textSize">12sp</item>
+    <item name="android:textSize">14sp</item>
+    <item name="textAllCaps">false</item>
+    <item name="android:textAllCaps">false</item>
+  </style>
+
+  <style name="MyTextAppearance.Material.Button" parent="@android:style/TextAppearance.Material.Button">
+    <item name="textAllCaps">false</item>
+    <item name="android:textAllCaps">false</item>
+  </style>
+
+  <style name="button_style" parent="@android:style/Widget.Button">
+    <item name="android:elevation">10dp</item>
+  </style>
+
+  <style name="MyDialogTheme" parent="Theme.AppCompat.Light.Dialog.Alert">
+    
   </style>
   
 </resources>

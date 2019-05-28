@@ -5345,14 +5345,14 @@ namespace PsuTimetable.Droid
 			// aapt resource value: 0x7f0900cb
 			public const int main_toolbar = 2131296459;
 			
-			// aapt resource value: 0x7f0900d7
-			public const int masked = 2131296471;
+			// aapt resource value: 0x7f0900d5
+			public const int masked = 2131296469;
 			
 			// aapt resource value: 0x7f0900bd
 			public const int media_actions = 2131296445;
 			
-			// aapt resource value: 0x7f0900d5
-			public const int message = 2131296469;
+			// aapt resource value: 0x7f0900d3
+			public const int message = 2131296467;
 			
 			// aapt resource value: 0x7f090031
 			public const int middle = 2131296305;
@@ -5654,12 +5654,6 @@ namespace PsuTimetable.Droid
 			// aapt resource value: 0x7f0900d2
 			public const int toolbar = 2131296466;
 			
-			// aapt resource value: 0x7f0900d4
-			public const int toolbar_accountImageButton = 2131296468;
-			
-			// aapt resource value: 0x7f0900d3
-			public const int toolbar_title = 2131296467;
-			
 			// aapt resource value: 0x7f09003e
 			public const int top = 2131296318;
 			
@@ -5696,8 +5690,8 @@ namespace PsuTimetable.Droid
 			// aapt resource value: 0x7f090016
 			public const int view_offset_helper = 2131296278;
 			
-			// aapt resource value: 0x7f0900d6
-			public const int visible = 2131296470;
+			// aapt resource value: 0x7f0900d4
+			public const int visible = 2131296468;
 			
 			// aapt resource value: 0x7f0900af
 			public const int volume_item_container = 2131296431;
@@ -6770,6 +6764,12 @@ namespace PsuTimetable.Droid
 			// aapt resource value: 0x7f0c0193
 			public const int MineCustomTabText = 2131493267;
 			
+			// aapt resource value: 0x7f0c0196
+			public const int MyDialogTheme = 2131493270;
+			
+			// aapt resource value: 0x7f0c0194
+			public const int MyTextAppearance_Material_Button = 2131493268;
+			
 			// aapt resource value: 0x7f0c002d
 			public const int Platform_AppCompat = 2131492909;
 			
@@ -7447,6 +7447,9 @@ namespace PsuTimetable.Droid
 			
 			// aapt resource value: 0x7f0c000a
 			public const int Widget_MediaRouter_MediaRouteButton = 2131492874;
+			
+			// aapt resource value: 0x7f0c0195
+			public const int button_style = 2131493269;
 			
 			static Style()
 			{

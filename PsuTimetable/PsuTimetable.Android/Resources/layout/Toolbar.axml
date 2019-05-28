@@ -7,22 +7,4 @@
 	android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
 	android:popupTheme="@style/ThemeOverlay.AppCompat.Light"
 	layout_scrollFlags="scroll|enterAlways">
-
-	<TextView
-		android:id="@+id/toolbar_title"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_gravity="center"
-		android:text="PSU Timetable"
-		android:textColor="@color/colorBlack"
-		android:textSize="16sp"/>
-
-	<ImageButton
-		android:id="@+id/toolbar_accountImageButton"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_gravity="start"
-		android:src="@drawable/outline_account_circle_24"
-		android:backgroundTint="@color/colorPrimary"/>
-
 </android.support.v7.widget.Toolbar>

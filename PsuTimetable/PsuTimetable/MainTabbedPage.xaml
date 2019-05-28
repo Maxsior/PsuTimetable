@@ -5,13 +5,63 @@
             x:Class="PsuTimetable.MainTabbedPage"
             android:TabbedPage.ToolbarPlacement="Bottom"
             android:TabbedPage.IsSwipePagingEnabled="False"
+            
             BackgroundColor="Accent">
+    
+    <NavigationPage.TitleView>
+        <StackLayout Orientation="Horizontal"
+                     HorizontalOptions="FillAndExpand"
+                     VerticalOptions="FillAndExpand"
+                     Padding="0,0,14,0">
+            <Button HorizontalOptions="StartAndExpand"
+                    VerticalOptions="CenterAndExpand"
+                    Image="@drawable/outline_account_circle_24"
+                    BackgroundColor="White"
+                    CornerRadius="100"
+                    WidthRequest="40"
+                    MinimumWidthRequest="40"
+                    HeightRequest="40"
+                    MinimumHeightRequest="40"
+                    Clicked="AccountButton_Clicked"/>
+            <Label Text="PSU Timetable"
+                   FontSize="16"
+                   TextColor="Black"
+                   HorizontalOptions="CenterAndExpand"
+                   VerticalOptions="CenterAndExpand"
+                   HorizontalTextAlignment="Center"
+                   VerticalTextAlignment="Center"/>
+            <Button HorizontalOptions="EndAndExpand"
+                    VerticalOptions="CenterAndExpand"
+                    Image="@drawable/round_update_24"
+                    BackgroundColor="White"
+                    CornerRadius="100"
+                    WidthRequest="40"
+                    MinimumWidthRequest="40"
+                    HeightRequest="40"
+                    MinimumHeightRequest="40"
+                    Clicked="UpdateButton_Clicked"/>
+        </StackLayout>
+    </NavigationPage.TitleView>
 
-    <!--<Page.ToolbarItems>
-        <ToolbarItem Icon="@drawable/round_account_circle_24"/>
-    </Page.ToolbarItems>-->
-
-    <ContentPage x:Name="alarmPage" Title="Будильник" BackgroundColor="White" Icon="@drawable/round_alarm_24"/>
+    <ContentPage x:Name="alarmPage"
+                 Title="Будильник"
+                 BackgroundColor="White"
+                 Icon="@drawable/round_alarm_24">
+        <!--<AbsoluteLayout>
+            <Button Text="Неделя с 20.05.2019 по 26.05.2019"
+                    BackgroundColor="Accent"
+                    TextColor="White"
+                    FontAttributes="None"
+                    FontSize="12"
+                    CornerRadius="100"
+                    HorizontalOptions="CenterAndExpand"
+                    AbsoluteLayout.LayoutFlags="PositionProportional"
+                    AbsoluteLayout.LayoutBounds=".95,.95,AutoSize,AutoSize"
+                    HeightRequest="36"
+                    MinimumHeightRequest="36"
+                    BorderWidth="0"/>
+        </AbsoluteLayout>-->
+    </ContentPage>
     <TabbedPage xmlns:android="clr-namespace:Xamarin.Forms.PlatformConfiguration.AndroidSpecific;assembly=Xamarin.Forms.Core"
                 x:Name="shedulePage"
                 Title="Расписание"
@@ -21,6 +71,10 @@
                 android:TabbedPage.BarSelectedItemColor="Black"
                 Icon="@drawable/round_today_24">
     </TabbedPage>
-    <ContentPage x:Name="settingsPage" Title="Настройки" BackgroundColor="White" Icon="@drawable/round_settings_24"/>
+    <ContentPage x:Name="settingsPage"
+                 Title="Настройки"
+                 BackgroundColor="White"
+                 Icon="@drawable/round_settings_24">
+    </ContentPage>
 
 </TabbedPage>
