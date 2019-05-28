@@ -22,12 +22,12 @@ namespace PsuTimetable
 
 		public LoginPage()
 		{
-			//InitializeComponent();
+			InitializeComponent();
 
-			Title = "Вход в ЕТИС";
 			Padding = new Thickness(10, 20, 10, 0);
 
 			messageLabel = new Label {
+				HorizontalOptions = LayoutOptions.FillAndExpand,
 				HorizontalTextAlignment = TextAlignment.Center,
 				TextColor = Color.OrangeRed
 			};
@@ -52,7 +52,8 @@ namespace PsuTimetable
 				HorizontalOptions = LayoutOptions.FillAndExpand,
 				TranslationY = 20,
 				BackgroundColor = Color.Accent,
-				CornerRadius = 50
+				CornerRadius = 50,
+				FontSize = 16
 			};
 			loginButton.Clicked += OnButtonClicked;
 
