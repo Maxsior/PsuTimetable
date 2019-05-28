@@ -49,17 +49,16 @@ namespace PsuTimetable
 			};
 
 			// Placeholder page
-			Page placeholderPage = new ContentPage
+			var placeholderPage = new ContentPage
 			{
-				Content = new Label
+				Content = new ActivityIndicator
 				{
-					HorizontalOptions = LayoutOptions.FillAndExpand,
-					VerticalOptions = LayoutOptions.FillAndExpand,
-					HorizontalTextAlignment = TextAlignment.Center,
-					VerticalTextAlignment = TextAlignment.Center,
-					TextColor = Color.Gray,
-					Text = "Обновление...",
-					FontSize = 20
+					HorizontalOptions = LayoutOptions.Center,
+					VerticalOptions = LayoutOptions.Center,
+					Color = Color.Accent,
+					HeightRequest = 48,
+					WidthRequest = 48,
+					IsRunning = true
 				}
 			};
 			shedulePage.Children.Add(placeholderPage);
