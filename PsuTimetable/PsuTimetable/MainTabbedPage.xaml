@@ -2,6 +2,7 @@
 <TabbedPage xmlns="http://xamarin.com/schemas/2014/forms"
             xmlns:android="clr-namespace:Xamarin.Forms.PlatformConfiguration.AndroidSpecific;assembly=Xamarin.Forms.Core"
             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+            xmlns:controls="clr-namespace:PsuTimetable.Controls"
             x:Class="PsuTimetable.MainTabbedPage"
             android:TabbedPage.ToolbarPlacement="Bottom"
             android:TabbedPage.IsSwipePagingEnabled="False"
@@ -62,7 +63,7 @@
                     BorderWidth="0"/>
         </AbsoluteLayout>-->
     </ContentPage>
-    <TabbedPage xmlns:android="clr-namespace:Xamarin.Forms.PlatformConfiguration.AndroidSpecific;assembly=Xamarin.Forms.Core"
+    <controls:CustomTabbedPage xmlns:android="clr-namespace:Xamarin.Forms.PlatformConfiguration.AndroidSpecific;assembly=Xamarin.Forms.Core"
                 x:Name="shedulePage"
                 Title="Расписание"
                 BackgroundColor="White"
@@ -70,7 +71,7 @@
                 android:TabbedPage.BarItemColor="Gray"
                 android:TabbedPage.BarSelectedItemColor="Black"
                 Icon="@drawable/round_today_24">
-    </TabbedPage>
+    </controls:CustomTabbedPage>
     <ContentPage x:Name="settingsPage"
                  Title="Настройки"
                  BackgroundColor="White"
