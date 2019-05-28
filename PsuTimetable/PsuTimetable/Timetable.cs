@@ -60,7 +60,7 @@ namespace PsuTimetable
 
 		public static DateTime GetLastUpdate()
 		{
-			return timetableData.LastUpdateTime; 
+			return timetableData.LastUpdateTime;
 		}
 
 		public static bool NeedUpdate()
