@@ -33,6 +33,21 @@ namespace PsuTimetable
 			};
 			consoleEntry.Completed += ConsoleEntry_Completed;
 
+			// Debug Page
+			settingsPage.Padding = new Thickness(5, 0, 5, 0);
+			settingsPage.Content = new StackLayout
+			{
+				Children =
+				{
+					consoleEntry,
+					new ScrollView
+					{
+						VerticalOptions = LayoutOptions.FillAndExpand,
+						Content = debugLabel
+					}
+				}
+			};
+
 			// Placeholder page
 			Page placeholderPage = new ContentPage
 			{
@@ -170,26 +185,6 @@ namespace PsuTimetable
 		private void UpdateUI()
 		{
 			shedulePage.Children.Clear();
-
-			// Debug Page
-			ContentPage debugPage = new ContentPage
-			{
-				Title = "Debug",
-				Padding = new Thickness(5, 0, 5, 0),
-				Content = new StackLayout
-				{
-					Children =
-					{
-						consoleEntry,
-						new ScrollView
-						{
-							VerticalOptions = LayoutOptions.FillAndExpand,
-							Content = debugLabel
-						}
-					}
-				}
-			};
-			shedulePage.Children.Add(debugPage);
 
 			// Days pages
 			var weeks = Timetable.GetWeeks();
