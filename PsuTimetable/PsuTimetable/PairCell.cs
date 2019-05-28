@@ -27,23 +27,36 @@ namespace PsuTimetable
 				VerticalTextAlignment = TextAlignment.Start
 			};
 
-			var teacherNameLabel = new Label()
+			//var teacherNameLabel = new Label()
+			//{
+			//	FontSize = 11,
+			//	TextColor = Color.Gray,
+			//	HorizontalOptions = LayoutOptions.EndAndExpand,
+			//	HorizontalTextAlignment = TextAlignment.End
+			//};
+
+			var teacherNameButton = new Button()
 			{
+				CornerRadius = 50,
 				FontSize = 11,
 				TextColor = Color.Gray,
 				HorizontalOptions = LayoutOptions.EndAndExpand,
-				HorizontalTextAlignment = TextAlignment.End
+				HeightRequest = 22,
+				MinimumHeightRequest = 22,
+				BackgroundColor = Color.White,
+				VerticalOptions = LayoutOptions.Center
 			};
 
 			var classroomLabel = new Label()
 			{
 				FontSize = 11,
 				TextColor = Color.Gray,
+				VerticalOptions = LayoutOptions.Center
 			};
 
 			nameLabel.SetBinding(Label.TextProperty, new Binding("Name"));
 			startTimeLabel.SetBinding(Label.TextProperty, new Binding("StartTime"));
-			teacherNameLabel.SetBinding(Label.TextProperty, new Binding("TeacherName"));
+			teacherNameButton.SetBinding(Button.TextProperty, new Binding("TeacherName"));
 			classroomLabel.SetBinding(Label.TextProperty, new Binding("Classroom"));
 
 			var verticaLayout = new StackLayout()
@@ -57,9 +70,10 @@ namespace PsuTimetable
 					{
 						Orientation = StackOrientation.Horizontal,
 						HorizontalOptions = LayoutOptions.FillAndExpand,
+						TranslationY = -3,
 						Children = {
 							classroomLabel,
-							teacherNameLabel
+							teacherNameButton
 						}
 					}
 				}

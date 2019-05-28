@@ -18,7 +18,7 @@
     <item name="colorControlNormal">#ff808080</item>
     <item name="android:colorForeground">@android:color/darker_gray</item>
     <item name="android:textAppearanceButton">@style/MyTextAppearance.Material.Button</item>
-    <!--<item name="android:buttonStyle">@style/button_style</item>-->
+    <item name="android:buttonStyle">@style/button_style</item>
     <item name="android:alertDialogTheme">@style/MyDialogTheme</item>
   </style>
 
@@ -42,7 +42,9 @@
   </style>
 
   <style name="button_style" parent="@android:style/Widget.Button">
-    <item name="android:elevation">10dp</item>
+    <!--<item name="android:elevation">10dp</item>-->
+    <item name="android:paddingTop">0dp</item>
+    <item name="android:paddingBottom">0dp</item>
   </style>
 
   <style name="MyDialogTheme" parent="Theme.AppCompat.Light.Dialog.Alert">
