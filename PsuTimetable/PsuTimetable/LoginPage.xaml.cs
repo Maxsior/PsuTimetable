@@ -24,7 +24,7 @@ namespace PsuTimetable
 		{
 			InitializeComponent();
 
-			Padding = new Thickness(10, 20, 10, 0);
+			Padding = new Thickness(10, 20, 10, 10);
 
 			messageLabel = new Label
 			{
@@ -50,7 +50,7 @@ namespace PsuTimetable
 				PlaceholderColor = Color.Gray
 			};
 
-			Button loginButton = new Button
+			var loginButton = new Button
 			{
 				Text = "Войти",
 				HorizontalOptions = LayoutOptions.FillAndExpand,
@@ -61,25 +61,33 @@ namespace PsuTimetable
 				FontSize = 16,
 				HeightRequest = 40
 			};
-			loginButton.Clicked += OnButtonClicked;
-
+			
+			var openInBrowserButton = new Button()
+			{
+				Text = "Открыть сайт в браузере",
+				CornerRadius = 50,
+				FontSize = 14,
+				TextColor = Color.Accent,
+				HorizontalOptions = LayoutOptions.Center,
+				VerticalOptions = LayoutOptions.EndAndExpand,
+				HeightRequest = 30,
+				MinimumHeightRequest = 30,
+				BackgroundColor = Color.White
+			};
+			
 			saveCredentialsSwitch = new Switch
 			{
 				IsToggled = true
 			};
 
-			usernameEntry.Completed += (object sender, EventArgs args) =>
-			{
-				passwordEntry.Focus();
-			};
-
-			passwordEntry.Completed += (object sender, EventArgs args) =>
-			{
-				Login(usernameEntry.Text, passwordEntry.Text, saveCredentialsSwitch.IsToggled);
-			};
+			usernameEntry.Completed += (object sender, EventArgs args) => passwordEntry.Focus();
+			passwordEntry.Completed += (object sender, EventArgs args) => Login(usernameEntry.Text, passwordEntry.Text, saveCredentialsSwitch.IsToggled);
+			openInBrowserButton.Clicked += (object sender, EventArgs args) => Device.OpenUri(new Uri("https://student.psu.ru/pls/stu_cus_et/stu.timetable"));
+			loginButton.Clicked += OnButtonClicked;
 
 			Content = new StackLayout
 			{
+				VerticalOptions = LayoutOptions.FillAndExpand,
 				Children = {
 					messageLabel,
 					usernameEntry,
@@ -96,7 +104,8 @@ namespace PsuTimetable
 							saveCredentialsSwitch
 						}
 					},
-					loginButton
+					loginButton,
+					openInBrowserButton
 				}
 			};
 		}
