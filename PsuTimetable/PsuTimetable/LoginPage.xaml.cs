@@ -52,8 +52,10 @@ namespace PsuTimetable
 				HorizontalOptions = LayoutOptions.FillAndExpand,
 				TranslationY = 20,
 				BackgroundColor = Color.Accent,
+				TextColor = Color.White,
 				CornerRadius = 50,
-				FontSize = 16
+				FontSize = 16,
+				HeightRequest = 36
 			};
 			loginButton.Clicked += OnButtonClicked;
 
