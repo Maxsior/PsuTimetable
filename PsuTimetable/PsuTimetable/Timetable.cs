@@ -55,7 +55,8 @@ namespace PsuTimetable
 
 		public static int GetCurrentWeekId()
 		{
-			return timetableData.CurrentWeekId;
+			int nextWeekId = timetableData.CurrentWeekId + 1;
+			return (DateTime.Now.DayOfWeek == DayOfWeek.Sunday && nextWeekId < timetableData.Weeks.Count) ? nextWeekId : timetableData.CurrentWeekId;
 		}
 
 		public static DateTime GetLastUpdate()
