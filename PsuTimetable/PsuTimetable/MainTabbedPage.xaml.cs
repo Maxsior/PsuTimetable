@@ -223,7 +223,7 @@ namespace PsuTimetable
 				shedulePage.Children.Add(page);
 
 				// Select page with current day
-				if (day.Name.ToLower() == DateTime.Now.ToString("dddd, dd MMMM"))
+				if (day.Name.ToLower() == DateTime.Now.ToString("dddd, d MMMM"))
 				{
 					shedulePage.CurrentPage = page;
 				}
