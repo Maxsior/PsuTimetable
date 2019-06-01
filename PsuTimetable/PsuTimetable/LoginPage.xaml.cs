@@ -61,7 +61,7 @@ namespace PsuTimetable
 				FontSize = 16,
 				HeightRequest = 40
 			};
-			
+
 			var openInBrowserButton = new Button()
 			{
 				Text = "Открыть сайт в браузере",
@@ -74,7 +74,7 @@ namespace PsuTimetable
 				MinimumHeightRequest = 30,
 				BackgroundColor = Color.White
 			};
-			
+
 			saveCredentialsSwitch = new Switch
 			{
 				IsToggled = true
@@ -82,8 +82,8 @@ namespace PsuTimetable
 
 			usernameEntry.Completed += (object sender, EventArgs args) => passwordEntry.Focus();
 			passwordEntry.Completed += (object sender, EventArgs args) => Login(usernameEntry.Text, passwordEntry.Text, saveCredentialsSwitch.IsToggled);
+			loginButton.Clicked += (object sender, EventArgs args) => Login(usernameEntry.Text, passwordEntry.Text, saveCredentialsSwitch.IsToggled);
 			openInBrowserButton.Clicked += (object sender, EventArgs args) => Device.OpenUri(new Uri("https://student.psu.ru/pls/stu_cus_et/stu.timetable"));
-			loginButton.Clicked += OnButtonClicked;
 
 			Content = new StackLayout
 			{
@@ -108,11 +108,6 @@ namespace PsuTimetable
 					openInBrowserButton
 				}
 			};
-		}
-
-		private void OnButtonClicked(object sender, EventArgs args)
-		{
-			Login(usernameEntry.Text, passwordEntry.Text, saveCredentialsSwitch.IsToggled);
 		}
 
 		private async void Login(string username, string password, bool bSaveCredentials)
