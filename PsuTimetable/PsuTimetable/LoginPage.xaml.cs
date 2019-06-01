@@ -26,20 +26,23 @@ namespace PsuTimetable
 
 			Padding = new Thickness(10, 20, 10, 0);
 
-			messageLabel = new Label {
+			messageLabel = new Label
+			{
 				HorizontalOptions = LayoutOptions.FillAndExpand,
 				HorizontalTextAlignment = TextAlignment.Center,
 				TextColor = Color.OrangeRed
 			};
 
-			usernameEntry = new Entry {
+			usernameEntry = new Entry
+			{
 				Placeholder = "Имя пользователя",
 				ReturnType = ReturnType.Next,
 				TextColor = Color.Black,
 				PlaceholderColor = Color.Gray
 			};
 
-			passwordEntry = new Entry {
+			passwordEntry = new Entry
+			{
 				Placeholder = "Пароль",
 				IsPassword = true,
 				ReturnType = ReturnType.Done,
@@ -47,7 +50,8 @@ namespace PsuTimetable
 				PlaceholderColor = Color.Gray
 			};
 
-			Button loginButton = new Button {
+			Button loginButton = new Button
+			{
 				Text = "Войти",
 				HorizontalOptions = LayoutOptions.FillAndExpand,
 				TranslationY = 20,
@@ -55,23 +59,27 @@ namespace PsuTimetable
 				TextColor = Color.White,
 				CornerRadius = 50,
 				FontSize = 16,
-				HeightRequest = 36
+				HeightRequest = 40
 			};
 			loginButton.Clicked += OnButtonClicked;
 
-			saveCredentialsSwitch = new Switch {
+			saveCredentialsSwitch = new Switch
+			{
 				IsToggled = true
 			};
 
-			usernameEntry.Completed += (object sender, EventArgs args) => {
+			usernameEntry.Completed += (object sender, EventArgs args) =>
+			{
 				passwordEntry.Focus();
 			};
 
-			passwordEntry.Completed += (object sender, EventArgs args) => {
+			passwordEntry.Completed += (object sender, EventArgs args) =>
+			{
 				Login(usernameEntry.Text, passwordEntry.Text, saveCredentialsSwitch.IsToggled);
 			};
 
-			Content = new StackLayout {
+			Content = new StackLayout
+			{
 				Children = {
 					messageLabel,
 					usernameEntry,
@@ -97,7 +105,7 @@ namespace PsuTimetable
 		{
 			Login(usernameEntry.Text, passwordEntry.Text, saveCredentialsSwitch.IsToggled);
 		}
-		
+
 		private async void Login(string username, string password, bool bSaveCredentials)
 		{
 			if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
