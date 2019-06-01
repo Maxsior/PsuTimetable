@@ -232,7 +232,11 @@ namespace PsuTimetable
 
 		private async void UpdateButton_Clicked(object sender, EventArgs e)
 		{
+			var button = (Button)sender;
+
+			button.IsEnabled = false;
 			await Refresh();
+			button.IsEnabled = true;
 		}
 
 		private void AccountButton_Clicked(object sender, EventArgs e)
