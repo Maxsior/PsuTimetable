@@ -63,10 +63,17 @@ namespace PsuTimetable
 			return timetableData.LastUpdateTime;
 		}
 
+		private static bool AreDifferentWeeks(DateTime date1, DateTime date2)
+		{
+			var d1 = date1.AddDays(-(((int)date1.DayOfWeek + 6) % 7));
+			var d2 = date2.AddDays(-(((int)date2.DayOfWeek + 6) % 7));
+
+			return d1.Date != d2.Date;
+		}
+
 		public static bool NeedUpdate()
 		{
-			TimeSpan interval = DateTime.Now.Date - timetableData.LastUpdateTime.Date;
-			return !File.Exists(timetableFilePath) || (DateTime.Now.DayOfWeek != DayOfWeek.Sunday && interval.TotalDays > 6);
+			return !File.Exists(timetableFilePath) || (DateTime.Now.DayOfWeek != DayOfWeek.Sunday && AreDifferentWeeks(DateTime.Now, timetableData.LastUpdateTime));
 		}
 
 		public static void Save()
