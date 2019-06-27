@@ -67,7 +67,8 @@ namespace PsuTimetable
 
 			// Load and update timetable
 			Timetable.Load();
-			currentWeekId = Timetable.GetCurrentWeekId();
+            //Teachers.Load();
+            currentWeekId = Timetable.GetCurrentWeekId();
 
 			if (Timetable.NeedUpdate())
 			{
@@ -130,9 +131,12 @@ namespace PsuTimetable
 		private async Task Logout()
 		{
 			Timetable.Clear();
-			await Credentials.Clear();
+            Teachers.Clear();
+            await Credentials.Clear();
 
-			Navigation.InsertPageBefore(new LoginPage(), this);
+            
+
+            Navigation.InsertPageBefore(new LoginPage(), this);
 			await Navigation.PopAsync();
 		}
 
@@ -161,7 +165,10 @@ namespace PsuTimetable
 					await Timetable.Update();
 					Timetable.Save();
 
-					currentWeekId = Timetable.GetCurrentWeekId();
+                    await Teachers.Update();
+                    //Teachers.Save();
+
+                    currentWeekId = Timetable.GetCurrentWeekId();
 					UpdateUI();
 
 					WriteDebugLine("Обновлено только что");
@@ -169,7 +176,7 @@ namespace PsuTimetable
 			}
 			else
 			{
-				if (Timetable.Load())
+				if (Timetable.Load() && Teachers.Load())
 				{
 					WriteDebugLine("Режим просмотра оффлайн");
 					UpdateUI();
@@ -227,7 +234,19 @@ namespace PsuTimetable
 				{
 					shedulePage.CurrentPage = page;
 				}
-			}
+
+                var teachers = Teachers.GetTeachers();
+
+                teacherPage.Content = new ListView
+                {
+                    SeparatorVisibility = SeparatorVisibility.None,
+                    RowHeight = 70,
+                    SelectionMode = ListViewSelectionMode.None,
+                    ItemTemplate = new DataTemplate(typeof(TeacherCell)),
+                    ItemsSource = teachers
+                };
+
+            }
 		}
 
 		private async void UpdateButton_Clicked(object sender, EventArgs e)

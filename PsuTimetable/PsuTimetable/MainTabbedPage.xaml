@@ -44,10 +44,10 @@
         </StackLayout>
     </NavigationPage.TitleView>
 
-    <ContentPage x:Name="alarmPage"
-                 Title="Будильник"
+    <ContentPage x:Name="teacherPage"
+                 Title="Преподаватели"
                  BackgroundColor="White"
-                 Icon="@drawable/round_alarm_24">
+                 Icon="@drawable/outline_people_24">
         <!--<AbsoluteLayout>
             <Button Text="Неделя с 20.05.2019 по 26.05.2019"
                     BackgroundColor="Accent"

@@ -1,0 +1,64 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using Xamarin.Forms;
+
+namespace PsuTimetable
+{
+	class TeacherCell : ViewCell
+	{
+		public TeacherCell()
+		{
+			var teacherImage = new Image
+			{
+			};
+
+            var NameLabel = new Label()
+            {
+                FontSize = 11,
+                TextColor = Color.Gray,
+                VerticalOptions = LayoutOptions.Center
+            };
+
+            var ChairLabel = new Label()
+            {
+                FontSize = 11,
+                TextColor = Color.Gray,
+                VerticalOptions = LayoutOptions.Center
+            };
+
+            var DescriptionLabel = new Label()
+            {
+                FontSize = 11,
+                TextColor = Color.Gray,
+                VerticalOptions = LayoutOptions.Center
+            };
+
+
+            teacherImage.SetBinding(Image.SourceProperty, new Binding("ImageUri"));
+            NameLabel.SetBinding(Label.TextProperty, new Binding("Name"));
+            ChairLabel.SetBinding(Label.TextProperty, new Binding("Chair"));
+            DescriptionLabel.SetBinding(Label.TextProperty, new Binding("Description"));
+
+			var verticaLayout = new StackLayout()
+			{
+				Orientation = StackOrientation.Vertical,
+				VerticalOptions = LayoutOptions.FillAndExpand,
+				HorizontalOptions = LayoutOptions.FillAndExpand,
+				Children = { NameLabel, ChairLabel , DescriptionLabel }
+			};
+
+			var horizontalLayout = new StackLayout()
+			{
+				Orientation = StackOrientation.Horizontal,
+				HorizontalOptions = LayoutOptions.FillAndExpand,
+				Children = {
+                    teacherImage,
+					verticaLayout
+				}
+			};
+
+			View = horizontalLayout;
+		}
+	}
+}
