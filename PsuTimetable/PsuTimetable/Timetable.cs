@@ -46,7 +46,7 @@ namespace PsuTimetable
 	public static class Timetable
 	{
 		private static TimetableData timetableData = new TimetableData();
-		private static readonly string timetableFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "timetable.xml");
+		private static readonly string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "timetable.xml");
 
 		public static List<Week> GetWeeks()
 		{
@@ -74,12 +74,12 @@ namespace PsuTimetable
 
 		public static bool NeedUpdate()
 		{
-			return !File.Exists(timetableFilePath) || (DateTime.Now.DayOfWeek != DayOfWeek.Sunday && AreDifferentWeeks(DateTime.Now, timetableData.LastUpdateTime));
+			return !File.Exists(filePath) || (DateTime.Now.DayOfWeek != DayOfWeek.Sunday && AreDifferentWeeks(DateTime.Now, timetableData.LastUpdateTime));
 		}
 
 		public static void Save()
 		{
-			using (var writer = File.OpenWrite(timetableFilePath))
+			using (var writer = File.Open(filePath, FileMode.Create, FileAccess.Write))
 			{
 				var serializer = new XmlSerializer(typeof(TimetableData));
 				serializer.Serialize(writer, timetableData);
@@ -88,11 +88,9 @@ namespace PsuTimetable
 
 		public static bool Load()
 		{
-			if (File.Exists(timetableFilePath))
+			if (File.Exists(filePath))
 			{
-				string text = File.ReadAllText(timetableFilePath);
-
-				using (var reader = new StringReader(text))
+				using (var reader = new StreamReader(filePath))
 				{
 					var serializer = new XmlSerializer(typeof(TimetableData));
 					timetableData = (TimetableData)serializer.Deserialize(reader);
@@ -106,7 +104,7 @@ namespace PsuTimetable
 
 		public static void Clear()
 		{
-			File.Delete(timetableFilePath);
+			File.Delete(filePath);
 		}
 
 		public static async Task Update()

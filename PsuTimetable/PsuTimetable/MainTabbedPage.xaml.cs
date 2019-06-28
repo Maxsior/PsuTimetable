@@ -131,10 +131,10 @@ namespace PsuTimetable
 		private async Task Logout()
 		{
 			Timetable.Clear();
-            Teachers.Clear();
-            await Credentials.Clear();
+			Teachers.Clear();
+			await Credentials.Clear();
 
-            Navigation.InsertPageBefore(new LoginPage(), this);
+			Navigation.InsertPageBefore(new LoginPage(), this);
 			await Navigation.PopAsync();
 		}
 
@@ -163,10 +163,10 @@ namespace PsuTimetable
 					await Timetable.Update();
 					Timetable.Save();
 
-                    await Teachers.Update();
-                    Teachers.Save();
+					await Teachers.Update();
+					Teachers.Save();
 
-                    currentWeekId = Timetable.GetCurrentWeekId();
+					currentWeekId = Timetable.GetCurrentWeekId();
 					UpdateUI();
 
 					WriteDebugLine("Обновлено только что");
@@ -193,6 +193,7 @@ namespace PsuTimetable
 
 			// Days pages
 			var weeks = Timetable.GetWeeks();
+			WriteDebugLine(weeks.Count.ToString());
 			foreach (Day day in weeks[currentWeekId].Days)
 			{
 				ContentPage page = new ContentPage
@@ -233,78 +234,75 @@ namespace PsuTimetable
 				{
 					shedulePage.CurrentPage = page;
 				}
+			}
 
-                var teachers = Teachers.GetTeachers();
-
-				//teacherPage.Content = new ListView
-				//{
-				//    SeparatorVisibility = SeparatorVisibility.None,
-				//    RowHeight = 100,
-				//    SelectionMode = ListViewSelectionMode.None,
-				//    ItemTemplate = new DataTemplate(typeof(TeacherCell)),
-				//    ItemsSource = teachers,
-
-				//};
-
-				var teachersStackLayout = new StackLayout();
-				teacherPage.Content = teachersStackLayout;
-				foreach (var t in teachers)
+			// Teachers page
+			var teachers = Teachers.GetTeachers();
+			WriteDebugLine(teachers.Count.ToString());
+			var teachersStackLayout = new StackLayout();
+			teacherPage.Content = new ScrollView
+			{
+				Content = teachersStackLayout
+			};
+			teacherPage.Padding = new Thickness(0, 8, 0, 0);
+			
+			foreach (var teacher in teachers)
+			{
+				var teacherImage = new Image
 				{
-					var teacherImage = new Image()
+					Source = new UriImageSource
 					{
-						Source = new UriImageSource
-						{
-							Uri = new Uri(t.ImageUri)
-						}
-					};
+						Uri = new Uri(teacher.ImageUri)
+					}
+				};
 
-					var NameLabel = new Label()
-					{
-						Text = t.Name,
-						FontSize = 14,
-						TextColor = Color.Black
-					};
+				var NameLabel = new Label
+				{
+					Text = teacher.Name,
+					FontSize = 14,
+					TextColor = Color.Black
+				};
 
-					var ChairLabel = new Label()
-					{
-						Text = t.Chair,
-						FontSize = 11,
-						TextColor = Color.Gray
-					};
+				var ChairLabel = new Label
+				{
+					Text = teacher.Chair,
+					FontSize = 12,
+					TextColor = Color.Gray
+				};
 
-					var DescriptionLabel = new Label()
-					{
-						Text = t.Description,
-						FontSize = 11,
-						TextColor = Color.Gray
-					};
+				var DescriptionLabel = new Label
+				{
+					Text = teacher.Description,
+					FontSize = 12,
+					TextColor = Color.Gray
+				};
 
-					var verticaLayout = new StackLayout()
-					{
-						Orientation = StackOrientation.Vertical,
-						VerticalOptions = LayoutOptions.FillAndExpand,
-						HorizontalOptions = LayoutOptions.FillAndExpand,
-						Children = { NameLabel, ChairLabel, DescriptionLabel }
-					};
+				var verticaLayout = new StackLayout
+				{
+					Orientation = StackOrientation.Vertical,
+					VerticalOptions = LayoutOptions.FillAndExpand,
+					HorizontalOptions = LayoutOptions.FillAndExpand,
+					Children = {
+						NameLabel,
+						ChairLabel,
+						DescriptionLabel
+					}
+				};
 
-					var horizontalLayout = new StackLayout()
-					{
-						Orientation = StackOrientation.Horizontal,
-						HorizontalOptions = LayoutOptions.FillAndExpand,
-						HeightRequest = 140,
-						Padding = new Thickness(5, 0, 5, 10),
+				var horizontalLayout = new StackLayout
+				{
+					Orientation = StackOrientation.Horizontal,
+					HorizontalOptions = LayoutOptions.FillAndExpand,
+					HeightRequest = 140,
+					Padding = new Thickness(5, 0, 5, 10),
+					Children = {
+						teacherImage,
+						verticaLayout
+					}
+				};
 
-						Children = {
-							teacherImage,
-							verticaLayout
-						}
-					};
-
-					teachersStackLayout.Children.Add(horizontalLayout);
-				}
-                
-
-            }
+				teachersStackLayout.Children.Add(horizontalLayout);
+			}
 		}
 
 		private async void UpdateButton_Clicked(object sender, EventArgs e)

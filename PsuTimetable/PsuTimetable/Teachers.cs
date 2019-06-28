@@ -20,7 +20,7 @@ namespace PsuTimetable
     public static class Teachers
     {
         private static List<Teacher> teachers = new List<Teacher>();
-        private static readonly string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "teachers.dat");
+        private static readonly string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "teachers.xml");
         private static readonly Uri baseUri = new Uri("https://student.psu.ru/pls/stu_cus_et/stu.teachers");
 
         public static List<Teacher> GetTeachers()
@@ -30,25 +30,23 @@ namespace PsuTimetable
 
         public static void Save()
         {
-			using (var writer = File.OpenWrite(filePath))
-            {
-                var serializer = new XmlSerializer(typeof(List<Teacher>));
+			using (var writer = File.Open(filePath, FileMode.Create, FileAccess.Write))
+			{
+				var serializer = new XmlSerializer(typeof(List<Teacher>));
                 serializer.Serialize(writer, teachers);
-            }
+			}
         }
 
         public static bool Load()
         {
             if (File.Exists(filePath))
             {
-                string text = File.ReadAllText(filePath);
-
-                using (var reader = new StringReader(text))
-                {
+				using (var reader = new StreamReader(filePath))
+				{
                     var serializer = new XmlSerializer(typeof(List<Teacher>));
                     teachers = (List<Teacher>)serializer.Deserialize(reader);
 
-                    return teachers.Count != 0;
+					return teachers.Count != 0;
                 }
             }
 
