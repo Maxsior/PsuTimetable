@@ -67,8 +67,8 @@ namespace PsuTimetable
 
 			// Load and update timetable
 			Timetable.Load();
-            //Teachers.Load();
-            currentWeekId = Timetable.GetCurrentWeekId();
+			Teachers.Load();
+			currentWeekId = Timetable.GetCurrentWeekId();
 
 			if (Timetable.NeedUpdate())
 			{
@@ -134,8 +134,6 @@ namespace PsuTimetable
             Teachers.Clear();
             await Credentials.Clear();
 
-            
-
             Navigation.InsertPageBefore(new LoginPage(), this);
 			await Navigation.PopAsync();
 		}
@@ -166,7 +164,7 @@ namespace PsuTimetable
 					Timetable.Save();
 
                     await Teachers.Update();
-                    //Teachers.Save();
+                    Teachers.Save();
 
                     currentWeekId = Timetable.GetCurrentWeekId();
 					UpdateUI();
@@ -176,7 +174,8 @@ namespace PsuTimetable
 			}
 			else
 			{
-				if (Timetable.Load() && Teachers.Load())
+				Teachers.Load();
+				if (Timetable.Load())
 				{
 					WriteDebugLine("Режим просмотра оффлайн");
 					UpdateUI();
@@ -237,15 +236,72 @@ namespace PsuTimetable
 
                 var teachers = Teachers.GetTeachers();
 
-                teacherPage.Content = new ListView
-                {
-                    SeparatorVisibility = SeparatorVisibility.None,
-                    RowHeight = 100,
-                    SelectionMode = ListViewSelectionMode.None,
-                    ItemTemplate = new DataTemplate(typeof(TeacherCell)),
-                    ItemsSource = teachers,
+				//teacherPage.Content = new ListView
+				//{
+				//    SeparatorVisibility = SeparatorVisibility.None,
+				//    RowHeight = 100,
+				//    SelectionMode = ListViewSelectionMode.None,
+				//    ItemTemplate = new DataTemplate(typeof(TeacherCell)),
+				//    ItemsSource = teachers,
 
-                };
+				//};
+
+				var teachersStackLayout = new StackLayout();
+				teacherPage.Content = teachersStackLayout;
+				foreach (var t in teachers)
+				{
+					var teacherImage = new Image()
+					{
+						Source = new UriImageSource
+						{
+							Uri = new Uri(t.ImageUri)
+						}
+					};
+
+					var NameLabel = new Label()
+					{
+						Text = t.Name,
+						FontSize = 14,
+						TextColor = Color.Black
+					};
+
+					var ChairLabel = new Label()
+					{
+						Text = t.Chair,
+						FontSize = 11,
+						TextColor = Color.Gray
+					};
+
+					var DescriptionLabel = new Label()
+					{
+						Text = t.Description,
+						FontSize = 11,
+						TextColor = Color.Gray
+					};
+
+					var verticaLayout = new StackLayout()
+					{
+						Orientation = StackOrientation.Vertical,
+						VerticalOptions = LayoutOptions.FillAndExpand,
+						HorizontalOptions = LayoutOptions.FillAndExpand,
+						Children = { NameLabel, ChairLabel, DescriptionLabel }
+					};
+
+					var horizontalLayout = new StackLayout()
+					{
+						Orientation = StackOrientation.Horizontal,
+						HorizontalOptions = LayoutOptions.FillAndExpand,
+						HeightRequest = 140,
+						Padding = new Thickness(5, 0, 5, 10),
+
+						Children = {
+							teacherImage,
+							verticaLayout
+						}
+					};
+
+					teachersStackLayout.Children.Add(horizontalLayout);
+				}
                 
 
             }

@@ -11,7 +11,7 @@ namespace PsuTimetable
 {
     public class Teacher
     {
-        public UriImageSource ImageUri { get; set; }
+        public string ImageUri { get; set; }
         public string Name { get; set; }
         public string Chair { get; set; }
         public string Description { get; set; }
@@ -20,7 +20,7 @@ namespace PsuTimetable
     public static class Teachers
     {
         private static List<Teacher> teachers = new List<Teacher>();
-        private static readonly string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "teachers.xml");
+        private static readonly string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "teachers.dat");
         private static readonly Uri baseUri = new Uri("https://student.psu.ru/pls/stu_cus_et/stu.teachers");
 
         public static List<Teacher> GetTeachers()
@@ -30,7 +30,7 @@ namespace PsuTimetable
 
         public static void Save()
         {
-            using (var writer = File.OpenWrite(filePath))
+			using (var writer = File.OpenWrite(filePath))
             {
                 var serializer = new XmlSerializer(typeof(List<Teacher>));
                 serializer.Serialize(writer, teachers);
@@ -77,10 +77,7 @@ namespace PsuTimetable
             {
                 Teacher teacher = new Teacher
                 {
-					ImageUri = new UriImageSource
-					{
-						Uri = new Uri(new Uri(baseUri, teacherInfoNode.SelectSingleNode("./tr/td[1]/div/img").Attributes["src"].Value).AbsoluteUri)
-					},
+					ImageUri = new Uri(baseUri, teacherInfoNode.SelectSingleNode("./tr/td[1]/div/img").Attributes["src"].Value).AbsoluteUri,
 					Name = teacherInfoNode.SelectSingleNode("./tr/td[2]/div[1]").InnerText.Trim('\n', ' '),
                     Chair = teacherInfoNode.SelectSingleNode("./tr/td[2]/div[2]").InnerText.Trim('\n', ' '),
                     Description = teacherInfoNode.SelectSingleNode("./tr/td[2]/div[3]").InnerText.Trim('\n', ' ')
