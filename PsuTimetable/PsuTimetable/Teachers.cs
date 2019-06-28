@@ -77,11 +77,11 @@ namespace PsuTimetable
             {
                 Teacher teacher = new Teacher
                 {
-                    ImageUri = new UriImageSource
-                    {
-                        Uri = new Uri(new Uri(baseUri, teacherInfoNode.SelectSingleNode("./tr/td[1]/div/img").Attributes["src"].Value).AbsoluteUri)
-                    },
-                    Name = teacherInfoNode.SelectSingleNode("./tr/td[2]/div[1]").InnerText.Trim('\n', ' '),
+					ImageUri = new UriImageSource
+					{
+						Uri = new Uri(new Uri(baseUri, teacherInfoNode.SelectSingleNode("./tr/td[1]/div/img").Attributes["src"].Value).AbsoluteUri)
+					},
+					Name = teacherInfoNode.SelectSingleNode("./tr/td[2]/div[1]").InnerText.Trim('\n', ' '),
                     Chair = teacherInfoNode.SelectSingleNode("./tr/td[2]/div[2]").InnerText.Trim('\n', ' '),
                     Description = teacherInfoNode.SelectSingleNode("./tr/td[2]/div[3]").InnerText.Trim('\n', ' ')
                 };

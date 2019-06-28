@@ -5,33 +5,28 @@ using Xamarin.Forms;
 
 namespace PsuTimetable
 {
-	class TeacherCell : ViewCell
-	{
-		public TeacherCell()
-		{
-			var teacherImage = new Image
-			{
-			};
+    class TeacherCell : ViewCell
+    {
+        public TeacherCell()
+        {
+			var teacherImage = new Image();
 
             var NameLabel = new Label()
             {
-                FontSize = 11,
-                TextColor = Color.Gray,
-                VerticalOptions = LayoutOptions.Center
+                FontSize = 14,
+                TextColor = Color.Black
             };
 
             var ChairLabel = new Label()
             {
                 FontSize = 11,
-                TextColor = Color.Gray,
-                VerticalOptions = LayoutOptions.Center
+                TextColor = Color.Gray
             };
 
             var DescriptionLabel = new Label()
             {
                 FontSize = 11,
-                TextColor = Color.Gray,
-                VerticalOptions = LayoutOptions.Center
+                TextColor = Color.Gray
             };
 
 
@@ -40,25 +35,27 @@ namespace PsuTimetable
             ChairLabel.SetBinding(Label.TextProperty, new Binding("Chair"));
             DescriptionLabel.SetBinding(Label.TextProperty, new Binding("Description"));
 
-			var verticaLayout = new StackLayout()
-			{
-				Orientation = StackOrientation.Vertical,
-				VerticalOptions = LayoutOptions.FillAndExpand,
-				HorizontalOptions = LayoutOptions.FillAndExpand,
-				Children = { NameLabel, ChairLabel , DescriptionLabel }
-			};
+            var verticaLayout = new StackLayout()
+            {
+                Orientation = StackOrientation.Vertical,
+                VerticalOptions = LayoutOptions.FillAndExpand,
+                HorizontalOptions = LayoutOptions.FillAndExpand,
+                Children = { NameLabel, ChairLabel, DescriptionLabel }
+            };
 
-			var horizontalLayout = new StackLayout()
-			{
-				Orientation = StackOrientation.Horizontal,
-				HorizontalOptions = LayoutOptions.FillAndExpand,
-				Children = {
+            var horizontalLayout = new StackLayout()
+            {
+                Orientation = StackOrientation.Horizontal,
+                HorizontalOptions = LayoutOptions.FillAndExpand,
+                Padding = new Thickness(5, 0, 5, 10),
+
+                Children = {
                     teacherImage,
-					verticaLayout
-				}
-			};
+                    verticaLayout
+                }
+            };
 
-			View = horizontalLayout;
-		}
-	}
+            View = horizontalLayout;
+        }
+    }
 }

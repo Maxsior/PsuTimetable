@@ -240,11 +240,13 @@ namespace PsuTimetable
                 teacherPage.Content = new ListView
                 {
                     SeparatorVisibility = SeparatorVisibility.None,
-                    RowHeight = 70,
+                    RowHeight = 100,
                     SelectionMode = ListViewSelectionMode.None,
                     ItemTemplate = new DataTemplate(typeof(TeacherCell)),
-                    ItemsSource = teachers
+                    ItemsSource = teachers,
+
                 };
+                
 
             }
 		}
