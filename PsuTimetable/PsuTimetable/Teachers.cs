@@ -60,6 +60,7 @@ namespace PsuTimetable
 
         public static async Task Update()
         {
+            teachers.Clear();
             HttpResponseMessage response = await App.MainClient.GetAsync("stu.teachers");
             string html = await response.Content.ReadAsStringAsync();
 

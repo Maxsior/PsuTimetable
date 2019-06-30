@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
 using Xamarin.Forms;
@@ -236,17 +237,18 @@ namespace PsuTimetable
 				}
 			}
 
-			// Teachers page
-			var teachers = Teachers.GetTeachers();
+            // Teachers page
+            List<Teacher> teachers = Teachers.GetTeachers();
 			WriteDebugLine(teachers.Count.ToString());
 			var teachersStackLayout = new StackLayout();
+            teachersStackLayout.Children.Clear();
 			teacherPage.Content = new ScrollView
 			{
 				Content = teachersStackLayout
 			};
 			teacherPage.Padding = new Thickness(0, 8, 0, 0);
 			
-			foreach (var teacher in teachers)
+			foreach (Teacher teacher in teachers)
 			{
 				var teacherImage = new Image
 				{
