@@ -4,6 +4,7 @@ using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using System.Net.Http;
 using System.Web;
+using System.Threading.Tasks;
 
 namespace PsuTimetable
 {
@@ -17,46 +18,72 @@ namespace PsuTimetable
 
 		public LoginPage()
 		{
-			//InitializeComponent();
+			InitializeComponent();
 
-			Title = "Вход в ЕТИС";
-			Padding = new Thickness(5, 20, 5, 0);
+			Padding = new Thickness(10, 20, 10, 10);
 
-			messageLabel = new Label {
-				HorizontalTextAlignment = TextAlignment.Center
+			messageLabel = new Label
+			{
+				HorizontalOptions = LayoutOptions.FillAndExpand,
+				HorizontalTextAlignment = TextAlignment.Center,
+				TextColor = Color.OrangeRed
 			};
 
-			usernameEntry = new Entry {
+			usernameEntry = new Entry
+			{
 				Placeholder = "Имя пользователя",
-				ReturnType = ReturnType.Next
+				ReturnType = ReturnType.Next,
+				TextColor = Color.Black,
+				PlaceholderColor = Color.Gray
 			};
 
-			passwordEntry = new Entry {
+			passwordEntry = new Entry
+			{
 				Placeholder = "Пароль",
 				IsPassword = true,
-				ReturnType = ReturnType.Done
+				ReturnType = ReturnType.Done,
+				TextColor = Color.Black,
+				PlaceholderColor = Color.Gray
 			};
 
-			Button loginButton = new Button {
+			var loginButton = new Button
+			{
 				Text = "Войти",
 				HorizontalOptions = LayoutOptions.FillAndExpand,
-				TranslationY = 20
+				TranslationY = 20,
+				BackgroundColor = Color.Accent,
+				TextColor = Color.White,
+				CornerRadius = 50,
+				FontSize = 16,
+				HeightRequest = 40
 			};
-			loginButton.Clicked += OnButtonClicked;
 
-			saveCredentialsSwitch = new Switch {
+			var openInBrowserButton = new Button()
+			{
+				Text = "Открыть сайт в браузере",
+				CornerRadius = 50,
+				FontSize = 14,
+				TextColor = Color.Accent,
+				HorizontalOptions = LayoutOptions.Center,
+				VerticalOptions = LayoutOptions.EndAndExpand,
+				HeightRequest = 30,
+				MinimumHeightRequest = 30,
+				BackgroundColor = Color.White
+			};
+
+			saveCredentialsSwitch = new Switch
+			{
 				IsToggled = true
 			};
 
-			usernameEntry.Completed += (object sender, EventArgs args) => {
-				passwordEntry.Focus();
-			};
+			usernameEntry.Completed += (object sender, EventArgs args) => passwordEntry.Focus();
+			passwordEntry.Completed += async (object sender, EventArgs args) => await Login(usernameEntry.Text, passwordEntry.Text, saveCredentialsSwitch.IsToggled);
+            loginButton.Clicked += async (object sender, EventArgs args) => await Login(usernameEntry.Text, passwordEntry.Text, saveCredentialsSwitch.IsToggled);
+            openInBrowserButton.Clicked += (object sender, EventArgs args) => Device.OpenUri(new Uri("https://student.psu.ru/pls/stu_cus_et/stu.timetable"));
 
-			passwordEntry.Completed += (object sender, EventArgs args) => {
-				Login(usernameEntry.Text, passwordEntry.Text, saveCredentialsSwitch.IsToggled);
-			};
-
-			Content = new StackLayout {
+            Content = new StackLayout
+			{
+				VerticalOptions = LayoutOptions.FillAndExpand,
 				Children = {
 					messageLabel,
 					usernameEntry,
@@ -67,22 +94,19 @@ namespace PsuTimetable
 						Children = {
 							new Label {
 								Text = "Запомнить меня",
-								VerticalTextAlignment = TextAlignment.Center
+								VerticalTextAlignment = TextAlignment.Center,
+								TextColor = Color.Black
 							},
 							saveCredentialsSwitch
 						}
 					},
-					loginButton
+					loginButton,
+					openInBrowserButton
 				}
 			};
 		}
 
-		private void OnButtonClicked(object sender, EventArgs args)
-		{
-			Login(usernameEntry.Text, passwordEntry.Text, saveCredentialsSwitch.IsToggled);
-		}
-		
-		private async void Login(string username, string password, bool bSaveCredentials)
+		private async Task Login(string username, string password, bool bSaveCredentials)
 		{
 			if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
 			{
@@ -90,13 +114,15 @@ namespace PsuTimetable
 				return;
 			}
 
-			if (!App.IsConnectionAvailable())
+            if (!await App.IsConnectionAvailable())
 			{
 				messageLabel.Text = "Не удалось подключиться к сети";
 				return;
 			}
+            
 
-			string postData = "p_redirect=&p_username=" + HttpUtility.UrlEncode(username, Encoding.GetEncoding(1251)) + "&p_password=" + password;
+
+            string postData = "p_redirect=&p_username=" + HttpUtility.UrlEncode(username, Encoding.GetEncoding(1251)) + "&p_password=" + password;
 			var content = new StringContent(postData, Encoding.UTF8, "application/x-www-form-urlencoded");
 
 			HttpResponseMessage response = await App.MainClient.PostAsync("stu.login", content);
@@ -108,6 +134,8 @@ namespace PsuTimetable
 			}
 
 			string html = await response.Content.ReadAsStringAsync();
+
+			// //*[@id="form"]/div[2]/div[1]/div
 
 			if (html.Contains("Неверное имя пользователя или пароль"))
 			{
@@ -129,7 +157,7 @@ namespace PsuTimetable
 
 			App.IsSignedIn = true;
 
-			Navigation.InsertPageBefore(new MainPage(), this);
+			Navigation.InsertPageBefore(new MainTabbedPage(), this);
 			await Navigation.PopAsync();
 		}
 	}

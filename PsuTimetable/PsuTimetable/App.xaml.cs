@@ -5,6 +5,9 @@ using System.Net.Http;
 using System.Web;
 using System.Text;
 using System.Threading.Tasks;
+using System.Net.NetworkInformation;
+using System.Net;
+using System.Net.Sockets;
 
 [assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 namespace PsuTimetable
@@ -25,13 +28,13 @@ namespace PsuTimetable
 
 			if (Credentials.IsSaved())
 			{
-				MainPage = new NavigationPage(new MainPage());
+				MainPage = new NavigationPage(new MainTabbedPage());
 			}
 			else
 			{
 				MainPage = new NavigationPage(new LoginPage());
 			}
-			
+
 		}
 
 		public static async Task<int> SendLoginRequest(string username, string password)
@@ -61,23 +64,24 @@ namespace PsuTimetable
 			{
 				return 4;
 			}
-			
+
 			return 0;
 		}
 
-		public static bool IsConnectionAvailable()
+		public async static Task<bool> IsConnectionAvailable()
 		{
-			try
-			{
-				System.Net.Sockets.TcpClient client = new System.Net.Sockets.TcpClient("www.google.com", 80);
-				client.Close();
-				return true;
-			}
-			catch (System.Exception)
-			{
-				return false;
-			}
-		}
+            var req = WebRequest.Create("http://www.google.com");
+            req.Timeout = 5000;
+            try
+            {
+                await req.GetResponseAsync();
+                return true;
+            }
+            catch(WebException)
+            {
+                return false;
+            }
+        }
 
 		protected override void OnStart()
 		{
